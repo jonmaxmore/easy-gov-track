@@ -2,19 +2,23 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard,
-  FileText,
-  QrCode,
-  User,
-  Menu,
-  X,
-  Leaf,
+  LayoutDashboard, FileText, QrCode, User, Menu, X, Leaf,
+  Sprout, Award,
 } from "lucide-react";
 
 const navItems = [
-  { path: "/", label: "แดชบอร์ด", icon: LayoutDashboard },
+  { path: "/dashboard", label: "แดชบอร์ด", icon: LayoutDashboard },
   { path: "/submit", label: "ยื่นเอกสาร", icon: FileText },
-  { path: "/track", label: "Track & Trace", icon: QrCode },
+  { path: "/planting", label: "การปลูก", icon: Sprout },
+  { path: "/certificates", label: "ใบรับรอง", icon: Award },
+  { path: "/track", label: "Trace", icon: QrCode },
+  { path: "/profile", label: "โปรไฟล์", icon: User },
+];
+
+const bottomNavItems = [
+  { path: "/dashboard", label: "หน้าหลัก", icon: LayoutDashboard },
+  { path: "/submit", label: "ยื่นเอกสาร", icon: FileText },
+  { path: "/track", label: "Trace", icon: QrCode },
   { path: "/profile", label: "โปรไฟล์", icon: User },
 ];
 
@@ -27,7 +31,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Top Header */}
       <header className="gov-gradient sticky top-0 z-50">
         <div className="container flex h-14 items-center justify-between md:h-16">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/dashboard" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-foreground/20">
               <Leaf className="h-5 w-5 text-primary-foreground" />
             </div>
@@ -90,9 +94,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     to={item.path}
                     onClick={() => setMobileOpen(false)}
                     className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
-                      active
-                        ? "bg-primary/10 text-primary"
-                        : "text-foreground hover:bg-muted"
+                      active ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
                     }`}
                   >
                     <item.icon className="h-5 w-5" />
@@ -120,7 +122,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Mobile Bottom Nav */}
       <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-card md:hidden">
         <div className="flex items-center justify-around py-2">
-          {navItems.map((item) => {
+          {bottomNavItems.map((item) => {
             const active = location.pathname === item.path;
             return (
               <Link
