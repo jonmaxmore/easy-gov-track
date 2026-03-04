@@ -18,6 +18,8 @@ import TrackTrace from "./pages/TrackTrace";
 import Profile from "./pages/Profile";
 import Planting from "./pages/Planting";
 import Certificates from "./pages/Certificates";
+import ApplicationDetail from "./pages/ApplicationDetail";
+import Payment from "./pages/Payment";
 
 // Provider pages
 import ProviderLogin from "./pages/ProviderLogin";
@@ -70,6 +72,8 @@ function AppRoutes() {
       <Route path="/profile" element={<Profile />} />
       <Route path="/planting" element={<Planting />} />
       <Route path="/certificates" element={<Certificates />} />
+      <Route path="/application/:id" element={<ApplicationDetail />} />
+      <Route path="/payment/:id" element={<Payment />} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

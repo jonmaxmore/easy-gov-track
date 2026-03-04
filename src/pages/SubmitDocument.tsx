@@ -1,16 +1,24 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Check, FileText, Upload, Leaf, MapPin, Send } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Check, FileText, MapPin, Upload, Shield, CreditCard, Send, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import StepApplicantInfo from "@/components/submit/StepApplicantInfo";
+import StepPlantSelection from "@/components/submit/StepPlantSelection";
+import StepFarmInfo from "@/components/submit/StepFarmInfo";
+import StepCompliance from "@/components/submit/StepCompliance";
+import StepDocuments from "@/components/submit/StepDocuments";
+import StepPaymentPreview from "@/components/submit/StepPaymentPreview";
+import StepConfirm from "@/components/submit/StepConfirm";
+import type { ApplicantInfo, FarmInfo, ComplianceInfo, UploadedDocument } from "@/types/application";
 
 const steps = [
-  { label: "ข้อมูลทั่วไป", icon: FileText },
+  { label: "ข้อมูลผู้ยื่น", icon: FileText },
+  { label: "ชนิดสมุนไพร", icon: Leaf },
   { label: "พื้นที่เพาะปลูก", icon: MapPin },
+  { label: "ความปลอดภัย", icon: Shield },
   { label: "เอกสารแนบ", icon: Upload },
+  { label: "ค่าธรรมเนียม", icon: CreditCard },
   { label: "ยืนยัน", icon: Send },
 ];
 
@@ -18,12 +26,36 @@ export default function SubmitDocumentPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const { toast } = useToast();
 
+  const [applicant, setApplicant] = useState<Partial<ApplicantInfo>>({
+    applicantType: "individual",
+  });
+  const [selectedPlant, setSelectedPlant] = useState("");
+  const [farm, setFarm] = useState<Partial<FarmInfo>>({});
+  const [compliance, setCompliance] = useState<Partial<ComplianceInfo>>({
+    hasCCTV: false,
+    hasFencing: false,
+    hasAccessLog: false,
+    hasBiometric: false,
+    hasSecurityGuard: false,
+    sopDocuments: [],
+  });
+  const [documents, setDocuments] = useState<UploadedDocument[]>([]);
+
   const handleSubmit = () => {
     toast({
       title: "ยื่นคำขอสำเร็จ",
-      description: "คำขอของคุณถูกส่งเรียบร้อยแล้ว รอการตรวจสอบ",
+      description: "คำขอของคุณถูกส่งเรียบร้อยแล้ว รหัส GACP-2026-00999 รอการชำระค่าตรวจเอกสาร ฿5,000",
     });
     setCurrentStep(0);
+  };
+
+  const canGoNext = () => {
+    switch (currentStep) {
+      case 0: return applicant.fullName && applicant.idCard && applicant.phone;
+      case 1: return !!selectedPlant;
+      case 2: return farm.farmName && farm.province;
+      default: return true;
+    }
   };
 
   return (
@@ -59,7 +91,7 @@ export default function SubmitDocumentPage() {
                 <span className="sm:hidden">{i + 1}</span>
               </button>
               {i < steps.length - 1 && (
-                <div className={`h-px w-4 sm:w-8 ${done ? "bg-success" : "bg-border"}`} />
+                <div className={`h-px w-3 sm:w-6 ${done ? "bg-success" : "bg-border"}`} />
               )}
             </div>
           );
@@ -73,10 +105,27 @@ export default function SubmitDocumentPage() {
         animate={{ opacity: 1, x: 0 }}
         className="rounded-xl border border-border bg-card p-4 card-shadow md:p-6"
       >
-        {currentStep === 0 && <StepGeneralInfo />}
-        {currentStep === 1 && <StepFarmInfo />}
-        {currentStep === 2 && <StepDocuments />}
-        {currentStep === 3 && <StepConfirm />}
+        {currentStep === 0 && (
+          <StepApplicantInfo value={applicant} onChange={setApplicant} />
+        )}
+        {currentStep === 1 && (
+          <StepPlantSelection value={selectedPlant} onChange={setSelectedPlant} />
+        )}
+        {currentStep === 2 && (
+          <StepFarmInfo value={farm} onChange={setFarm} />
+        )}
+        {currentStep === 3 && (
+          <StepCompliance value={compliance} onChange={setCompliance} selectedPlant={selectedPlant} />
+        )}
+        {currentStep === 4 && (
+          <StepDocuments documents={documents} onChange={setDocuments} selectedPlant={selectedPlant} />
+        )}
+        {currentStep === 5 && (
+          <StepPaymentPreview />
+        )}
+        {currentStep === 6 && (
+          <StepConfirm applicant={applicant} farm={farm} selectedPlant={selectedPlant} />
+        )}
       </motion.div>
 
       {/* Navigation */}
@@ -89,7 +138,7 @@ export default function SubmitDocumentPage() {
           ย้อนกลับ
         </Button>
         {currentStep < steps.length - 1 ? (
-          <Button onClick={() => setCurrentStep(currentStep + 1)}>
+          <Button onClick={() => setCurrentStep(currentStep + 1)} disabled={!canGoNext()}>
             ถัดไป
           </Button>
         ) : (
@@ -99,107 +148,6 @@ export default function SubmitDocumentPage() {
           </Button>
         )}
       </div>
-    </div>
-  );
-}
-
-function StepGeneralInfo() {
-  return (
-    <div className="space-y-4">
-      <h3 className="text-sm font-semibold">ข้อมูลทั่วไปของผู้ยื่นคำขอ</h3>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1.5">
-          <Label className="text-xs">ชื่อ-นามสกุล</Label>
-          <Input placeholder="กรอกชื่อ-นามสกุล" />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs">เลขบัตรประชาชน</Label>
-          <Input placeholder="X-XXXX-XXXXX-XX-X" />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs">เบอร์โทรศัพท์</Label>
-          <Input placeholder="0XX-XXX-XXXX" />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs">อีเมล</Label>
-          <Input placeholder="email@example.com" type="email" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function StepFarmInfo() {
-  return (
-    <div className="space-y-4">
-      <h3 className="text-sm font-semibold">ข้อมูลพื้นที่เพาะปลูก</h3>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1.5">
-          <Label className="text-xs">ชื่อแปลง/สวน</Label>
-          <Input placeholder="ชื่อแปลงเพาะปลูก" />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs">ชนิดสมุนไพร</Label>
-          <Input placeholder="เช่น กัญชง, ฟ้าทะลายโจร" />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs">พื้นที่ (ไร่)</Label>
-          <Input placeholder="0.00" type="number" />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs">จังหวัด</Label>
-          <Input placeholder="เลือกจังหวัด" />
-        </div>
-      </div>
-      <div className="space-y-1.5">
-        <Label className="text-xs">ที่อยู่แปลงเพาะปลูก</Label>
-        <Textarea placeholder="ที่อยู่โดยละเอียด" rows={3} />
-      </div>
-    </div>
-  );
-}
-
-function StepDocuments() {
-  return (
-    <div className="space-y-4">
-      <h3 className="text-sm font-semibold">เอกสารแนบ</h3>
-      <p className="text-xs text-muted-foreground">อัพโหลดเอกสารที่เกี่ยวข้องเพื่อประกอบการพิจารณา</p>
-
-      {[
-        "สำเนาบัตรประชาชน",
-        "สำเนาทะเบียนบ้าน",
-        "แผนผังแปลงเพาะปลูก",
-        "ใบอนุญาตปลูก (ถ้ามี)",
-      ].map((doc) => (
-        <div
-          key={doc}
-          className="flex items-center justify-between rounded-lg border border-dashed border-border p-3"
-        >
-          <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{doc}</span>
-          </div>
-          <Button variant="outline" size="sm" className="text-xs">
-            <Upload className="mr-1 h-3 w-3" />
-            อัพโหลด
-          </Button>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function StepConfirm() {
-  return (
-    <div className="space-y-4 text-center">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-        <Leaf className="h-8 w-8 text-primary" />
-      </div>
-      <h3 className="text-sm font-semibold">ยืนยันการยื่นคำขอ</h3>
-      <p className="mx-auto max-w-sm text-xs text-muted-foreground">
-        กรุณาตรวจสอบข้อมูลทั้งหมดให้ถูกต้องก่อนกดยื่นคำขอ หลังจากยื่นแล้วจะไม่สามารถแก้ไขได้
-        จนกว่าเจ้าหน้าที่จะส่งกลับแก้ไข
-      </p>
     </div>
   );
 }
