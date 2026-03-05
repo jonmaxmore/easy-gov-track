@@ -1,18 +1,65 @@
-import { PLANT_TYPES } from "@/constants/gacp";
-import { Leaf, Shield, ShieldCheck } from "lucide-react";
+import { PLANT_TYPES, APPLICATION_TYPES } from "@/constants/gacp";
+import { Leaf, Shield, ShieldCheck, FileText, RefreshCw, Replace } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import type { ApplicationType } from "@/types/application";
 
 interface Props {
   value: string;
   onChange: (v: string) => void;
+  applicationType: ApplicationType;
+  onApplicationTypeChange: (v: ApplicationType) => void;
 }
 
-export default function StepPlantSelection({ value, onChange }: Props) {
+const appTypeIcons: Record<ApplicationType, React.ElementType> = {
+  NEW: FileText,
+  RENEW: RefreshCw,
+  AMEND: Replace,
+};
+
+export default function StepPlantSelection({ value, onChange, applicationType, onApplicationTypeChange }: Props) {
   return (
-    <div className="space-y-4">
-      <h3 className="text-sm font-semibold">เลือกชนิดสมุนไพรที่ต้องการขอรับรอง</h3>
-      <p className="text-xs text-muted-foreground">
-        ชนิดพืชจะกำหนดเอกสารและข้อกำหนดความปลอดภัยที่ต้องใช้
-      </p>
+    <div className="space-y-5">
+      {/* Application Type */}
+      <div className="space-y-2">
+        <h3 className="text-sm font-semibold">ประเภทการยื่นคำขอ</h3>
+        <RadioGroup
+          value={applicationType}
+          onValueChange={(v) => onApplicationTypeChange(v as ApplicationType)}
+          className="grid grid-cols-1 gap-2 sm:grid-cols-3"
+        >
+          {APPLICATION_TYPES.map((t) => {
+            const Icon = appTypeIcons[t.value];
+            return (
+              <label
+                key={t.value}
+                className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
+                  applicationType === t.value
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:bg-muted/50"
+                }`}
+              >
+                <RadioGroupItem value={t.value} />
+                <div className="flex items-center gap-2">
+                  <Icon className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium">{t.label}</p>
+                    <p className="text-[11px] text-muted-foreground">{t.desc}</p>
+                  </div>
+                </div>
+              </label>
+            );
+          })}
+        </RadioGroup>
+      </div>
+
+      {/* Plant Selection */}
+      <div className="space-y-2">
+        <h3 className="text-sm font-semibold">เลือกชนิดสมุนไพรที่ต้องการขอรับรอง</h3>
+        <p className="text-xs text-muted-foreground">
+          ชนิดพืชจะกำหนดเอกสารและข้อกำหนดความปลอดภัยที่ต้องใช้
+        </p>
+      </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
         {PLANT_TYPES.map((plant) => {
@@ -59,6 +106,22 @@ export default function StepPlantSelection({ value, onChange }: Props) {
           );
         })}
       </div>
+
+      {/* Info note for application type */}
+      {applicationType === "RENEW" && (
+        <div className="rounded-lg border border-info/30 bg-info/5 p-3">
+          <p className="text-xs text-info">
+            📋 การต่ออายุต้องแนบใบรับรองเก่า, รายงานผลการดำเนินงาน และผลตรวจปัจจุบัน
+          </p>
+        </div>
+      )}
+      {applicationType === "AMEND" && (
+        <div className="rounded-lg border border-warning/30 bg-warning/5 p-3">
+          <p className="text-xs text-warning">
+            📋 ขอใบแทนต้องแนบใบแจ้งความ (สูญหาย) หรือภาพถ่ายใบรับรอง (ชำรุด) + สำเนาบัตรประชาชน
+          </p>
+        </div>
+      )}
     </div>
   );
 }
