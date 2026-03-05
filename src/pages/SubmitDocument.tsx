@@ -10,7 +10,7 @@ import StepCompliance from "@/components/submit/StepCompliance";
 import StepDocuments from "@/components/submit/StepDocuments";
 import StepPaymentPreview from "@/components/submit/StepPaymentPreview";
 import StepConfirm from "@/components/submit/StepConfirm";
-import type { ApplicantInfo, FarmInfo, ComplianceInfo, UploadedDocument } from "@/types/application";
+import type { ApplicantInfo, FarmInfo, ComplianceInfo, UploadedDocument, ApplicationType } from "@/types/application";
 
 const steps = [
   { label: "ข้อมูลผู้ยื่น", icon: FileText },
@@ -26,18 +26,26 @@ export default function SubmitDocumentPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const { toast } = useToast();
 
+  const [applicationType, setApplicationType] = useState<ApplicationType>("NEW");
   const [applicant, setApplicant] = useState<Partial<ApplicantInfo>>({
     applicantType: "individual",
   });
   const [selectedPlant, setSelectedPlant] = useState("");
-  const [farm, setFarm] = useState<Partial<FarmInfo>>({});
+  const [farm, setFarm] = useState<Partial<FarmInfo>>({ landOwnership: "owned" });
   const [compliance, setCompliance] = useState<Partial<ComplianceInfo>>({
     hasCCTV: false,
     hasFencing: false,
     hasAccessLog: false,
     hasBiometric: false,
     hasSecurityGuard: false,
+    hasZoning: false,
+    hasInventoryControl: false,
+    hasScreeningMeasure: false,
     sopDocuments: [],
+    sopCoverage: {
+      cultivation: false, harvesting: false, drying: false,
+      trimming: false, packaging: false, storage: false, wasteDisposal: false,
+    },
   });
   const [documents, setDocuments] = useState<UploadedDocument[]>([]);
 
@@ -51,9 +59,9 @@ export default function SubmitDocumentPage() {
 
   const canGoNext = () => {
     switch (currentStep) {
-      case 0: return applicant.fullName && applicant.idCard && applicant.phone;
+      case 0: return applicant.fullName && applicant.idCard && applicant.phone && applicant.address;
       case 1: return !!selectedPlant;
-      case 2: return farm.farmName && farm.province;
+      case 2: return farm.farmName && farm.province && farm.landOwnership;
       default: return true;
     }
   };
@@ -109,7 +117,12 @@ export default function SubmitDocumentPage() {
           <StepApplicantInfo value={applicant} onChange={setApplicant} />
         )}
         {currentStep === 1 && (
-          <StepPlantSelection value={selectedPlant} onChange={setSelectedPlant} />
+          <StepPlantSelection
+            value={selectedPlant}
+            onChange={setSelectedPlant}
+            applicationType={applicationType}
+            onApplicationTypeChange={setApplicationType}
+          />
         )}
         {currentStep === 2 && (
           <StepFarmInfo value={farm} onChange={setFarm} />
@@ -118,13 +131,25 @@ export default function SubmitDocumentPage() {
           <StepCompliance value={compliance} onChange={setCompliance} selectedPlant={selectedPlant} />
         )}
         {currentStep === 4 && (
-          <StepDocuments documents={documents} onChange={setDocuments} selectedPlant={selectedPlant} />
+          <StepDocuments
+            documents={documents}
+            onChange={setDocuments}
+            selectedPlant={selectedPlant}
+            applicationType={applicationType}
+          />
         )}
         {currentStep === 5 && (
           <StepPaymentPreview />
         )}
         {currentStep === 6 && (
-          <StepConfirm applicant={applicant} farm={farm} selectedPlant={selectedPlant} />
+          <StepConfirm
+            applicant={applicant}
+            farm={farm}
+            compliance={compliance}
+            documents={documents}
+            selectedPlant={selectedPlant}
+            applicationType={applicationType}
+          />
         )}
       </motion.div>
 

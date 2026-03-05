@@ -3,6 +3,7 @@
 
 export type ApplicationStatus =
   | "DRAFT"
+  | "REGISTERED"
   | "SUBMITTED"
   | "PENDING_DOC_FEE"
   | "DOC_FEE_PAID"
@@ -23,6 +24,10 @@ export type PlantControlLevel = "HIGH_CONTROL" | "GENERAL";
 
 export type ApplicantType = "individual" | "enterprise" | "cooperative";
 
+export type ApplicationType = "NEW" | "RENEW" | "AMEND";
+
+export type LandOwnershipType = "owned" | "leased" | "government" | "community";
+
 export interface PlantType {
   code: string;
   nameTh: string;
@@ -42,6 +47,8 @@ export interface RequiredDocument {
   nameTh: string;
   required: boolean;
   forControlLevel?: PlantControlLevel;
+  forPlantCodes?: string[];
+  forApplicationTypes?: ApplicationType[];
   description?: string;
 }
 
@@ -79,6 +86,11 @@ export interface FarmInfo {
   address: string;
   gpsLat?: number;
   gpsLng?: number;
+  landOwnership: LandOwnershipType;
+  landDocNumber?: string;
+  buildingType?: string;
+  waterSource?: string;
+  soilType?: string;
 }
 
 export interface ApplicantInfo {
@@ -87,8 +99,12 @@ export interface ApplicantInfo {
   phone: string;
   email: string;
   applicantType: ApplicantType;
+  address: string;
+  position?: string;
   organizationName?: string;
   organizationId?: string;
+  authorizedPerson?: string;
+  powerOfAttorney?: boolean;
 }
 
 export interface ComplianceInfo {
@@ -97,12 +113,30 @@ export interface ComplianceInfo {
   hasAccessLog: boolean;
   hasBiometric: boolean;
   hasSecurityGuard: boolean;
+  fenceHeight?: number;
+  cctvCount?: number;
+  hasZoning: boolean;
+  hasInventoryControl: boolean;
+  hasScreeningMeasure: boolean;
   sopDocuments: string[];
   securityPlan: string;
+  sopCoverage: {
+    cultivation: boolean;
+    harvesting: boolean;
+    drying: boolean;
+    trimming: boolean;
+    packaging: boolean;
+    storage: boolean;
+    wasteDisposal: boolean;
+  };
+  productionPlan?: string;
+  pestManagement?: string;
+  waterManagement?: string;
 }
 
 export interface Application {
   id: string;
+  applicationType: ApplicationType;
   applicant: ApplicantInfo;
   farm: FarmInfo;
   compliance: ComplianceInfo;
@@ -116,6 +150,7 @@ export interface Application {
   auditDate?: string;
   totalScore?: number;
   certificateId?: string;
+  previousCertificateId?: string;
 }
 
 export interface PaymentInfo {

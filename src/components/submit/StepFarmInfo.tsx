@@ -2,13 +2,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { THAI_PROVINCES } from "@/constants/gacp";
-import type { FarmInfo } from "@/types/application";
+import type { FarmInfo, LandOwnershipType } from "@/types/application";
 
 interface Props {
   value: Partial<FarmInfo>;
   onChange: (v: Partial<FarmInfo>) => void;
 }
+
+const landOwnershipTypes: { value: LandOwnershipType; label: string }[] = [
+  { value: "owned", label: "เจ้าของกรรมสิทธิ์" },
+  { value: "leased", label: "เช่า/ยืม" },
+  { value: "government", label: "ที่ราชการ" },
+  { value: "community", label: "ที่ชุมชน/สหกรณ์" },
+];
 
 export default function StepFarmInfo({ value, onChange }: Props) {
   const update = (key: keyof FarmInfo, val: string | number) =>
@@ -40,6 +48,53 @@ export default function StepFarmInfo({ value, onChange }: Props) {
             onChange={(e) => update("areaRai", parseFloat(e.target.value))}
           />
         </div>
+      </div>
+
+      {/* Land Ownership */}
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">สิทธิ์ในที่ดิน <span className="text-destructive">*</span></Label>
+        <RadioGroup
+          value={value.landOwnership || "owned"}
+          onValueChange={(v) => update("landOwnership", v)}
+          className="grid grid-cols-2 gap-2 sm:grid-cols-4"
+        >
+          {landOwnershipTypes.map((t) => (
+            <label
+              key={t.value}
+              className={`flex cursor-pointer items-center gap-2 rounded-lg border p-2.5 text-xs transition-colors ${
+                value.landOwnership === t.value
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:bg-muted/50"
+              }`}
+            >
+              <RadioGroupItem value={t.value} />
+              <span>{t.label}</span>
+            </label>
+          ))}
+        </RadioGroup>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label className="text-xs">เลขที่โฉนด/เอกสารสิทธิ์</Label>
+          <Input
+            placeholder="เลขที่เอกสารสิทธิ์"
+            value={value.landDocNumber || ""}
+            onChange={(e) => update("landDocNumber", e.target.value)}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">ประเภทอาคาร/โรงเรือน</Label>
+          <Input
+            placeholder="เช่น โรงเรือนปิด, เรือนกระจก, เปิดโล่ง"
+            value={value.buildingType || ""}
+            onChange={(e) => update("buildingType", e.target.value)}
+          />
+        </div>
+      </div>
+
+      {/* Location */}
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label className="text-xs">
             จังหวัด <span className="text-destructive">*</span>
@@ -71,14 +126,51 @@ export default function StepFarmInfo({ value, onChange }: Props) {
             onChange={(e) => update("subDistrict", e.target.value)}
           />
         </div>
+      </div>
+
+      {/* GPS */}
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">พิกัด GPS (จาก Google Maps)</Label>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label className="text-[10px] text-muted-foreground">ละติจูด (Latitude)</Label>
+            <Input
+              placeholder="เช่น 18.7883"
+              type="number"
+              step="any"
+              value={value.gpsLat || ""}
+              onChange={(e) => update("gpsLat", parseFloat(e.target.value))}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-[10px] text-muted-foreground">ลองจิจูด (Longitude)</Label>
+            <Input
+              placeholder="เช่น 98.9853"
+              type="number"
+              step="any"
+              value={value.gpsLng || ""}
+              onChange={(e) => update("gpsLng", parseFloat(e.target.value))}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Environmental */}
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <Label className="text-xs">พิกัด GPS (ละติจูด)</Label>
+          <Label className="text-xs">แหล่งน้ำ</Label>
           <Input
-            placeholder="เช่น 18.7883"
-            type="number"
-            step="any"
-            value={value.gpsLat || ""}
-            onChange={(e) => update("gpsLat", parseFloat(e.target.value))}
+            placeholder="เช่น บ่อบาดาล, ประปา, คลองชลประทาน"
+            value={value.waterSource || ""}
+            onChange={(e) => update("waterSource", e.target.value)}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">ประเภทดิน</Label>
+          <Input
+            placeholder="เช่น ดินร่วน, ดินเหนียว, ดินทราย"
+            value={value.soilType || ""}
+            onChange={(e) => update("soilType", e.target.value)}
           />
         </div>
       </div>
