@@ -9,6 +9,7 @@ import type { FarmInfo, LandOwnershipType } from "@/types/application";
 interface Props {
   value: Partial<FarmInfo>;
   onChange: (v: Partial<FarmInfo>) => void;
+  errors?: Record<string, string>;
 }
 
 const landOwnershipTypes: { value: LandOwnershipType; label: string }[] = [
@@ -18,7 +19,12 @@ const landOwnershipTypes: { value: LandOwnershipType; label: string }[] = [
   { value: "community", label: "ที่ชุมชน/สหกรณ์" },
 ];
 
-export default function StepFarmInfo({ value, onChange }: Props) {
+function FieldError({ error }: { error?: string }) {
+  if (!error) return null;
+  return <p className="text-[11px] text-destructive mt-0.5">{error}</p>;
+}
+
+export default function StepFarmInfo({ value, onChange, errors = {} }: Props) {
   const update = (key: keyof FarmInfo, val: string | number) =>
     onChange({ ...value, [key]: val });
 
@@ -35,7 +41,9 @@ export default function StepFarmInfo({ value, onChange }: Props) {
             placeholder="ชื่อแปลงเพาะปลูก"
             value={value.farmName || ""}
             onChange={(e) => update("farmName", e.target.value)}
+            className={errors.farmName ? "border-destructive" : ""}
           />
+          <FieldError error={errors.farmName} />
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs">
@@ -46,7 +54,9 @@ export default function StepFarmInfo({ value, onChange }: Props) {
             type="number"
             value={value.areaRai || ""}
             onChange={(e) => update("areaRai", parseFloat(e.target.value))}
+            className={errors.areaRai ? "border-destructive" : ""}
           />
+          <FieldError error={errors.areaRai} />
         </div>
       </div>
 
@@ -94,13 +104,13 @@ export default function StepFarmInfo({ value, onChange }: Props) {
       </div>
 
       {/* Location */}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-3">
         <div className="space-y-1.5">
           <Label className="text-xs">
             จังหวัด <span className="text-destructive">*</span>
           </Label>
           <Select value={value.province} onValueChange={(v) => update("province", v)}>
-            <SelectTrigger>
+            <SelectTrigger className={errors.province ? "border-destructive" : ""}>
               <SelectValue placeholder="เลือกจังหวัด" />
             </SelectTrigger>
             <SelectContent>
@@ -109,22 +119,27 @@ export default function StepFarmInfo({ value, onChange }: Props) {
               ))}
             </SelectContent>
           </Select>
+          <FieldError error={errors.province} />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs">อำเภอ</Label>
+          <Label className="text-xs">อำเภอ <span className="text-destructive">*</span></Label>
           <Input
             placeholder="อำเภอ"
             value={value.district || ""}
             onChange={(e) => update("district", e.target.value)}
+            className={errors.district ? "border-destructive" : ""}
           />
+          <FieldError error={errors.district} />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs">ตำบล</Label>
+          <Label className="text-xs">ตำบล <span className="text-destructive">*</span></Label>
           <Input
             placeholder="ตำบล"
             value={value.subDistrict || ""}
             onChange={(e) => update("subDistrict", e.target.value)}
+            className={errors.subDistrict ? "border-destructive" : ""}
           />
+          <FieldError error={errors.subDistrict} />
         </div>
       </div>
 
@@ -140,7 +155,9 @@ export default function StepFarmInfo({ value, onChange }: Props) {
               step="any"
               value={value.gpsLat || ""}
               onChange={(e) => update("gpsLat", parseFloat(e.target.value))}
+              className={errors.gpsLat ? "border-destructive" : ""}
             />
+            <FieldError error={errors.gpsLat} />
           </div>
           <div className="space-y-1.5">
             <Label className="text-[10px] text-muted-foreground">ลองจิจูด (Longitude)</Label>
@@ -150,7 +167,9 @@ export default function StepFarmInfo({ value, onChange }: Props) {
               step="any"
               value={value.gpsLng || ""}
               onChange={(e) => update("gpsLng", parseFloat(e.target.value))}
+              className={errors.gpsLng ? "border-destructive" : ""}
             />
+            <FieldError error={errors.gpsLng} />
           </div>
         </div>
       </div>
@@ -176,13 +195,15 @@ export default function StepFarmInfo({ value, onChange }: Props) {
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs">ที่อยู่แปลงเพาะปลูก (โดยละเอียด)</Label>
+        <Label className="text-xs">ที่อยู่แปลงเพาะปลูก (โดยละเอียด) <span className="text-destructive">*</span></Label>
         <Textarea
           placeholder="ที่อยู่โดยละเอียด"
           rows={3}
           value={value.address || ""}
           onChange={(e) => update("address", e.target.value)}
+          className={errors.address ? "border-destructive" : ""}
         />
+        <FieldError error={errors.address} />
       </div>
     </div>
   );

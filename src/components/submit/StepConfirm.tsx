@@ -1,19 +1,36 @@
-import { Leaf, User, MapPin, FileText, Shield, Upload, CheckCircle2 } from "lucide-react";
+import { Leaf, User, MapPin, FileText, Shield, Upload, CheckCircle2, Sprout } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PLANT_TYPES, PRE_SUBMIT_CHECKLIST, getRelevantDocuments } from "@/constants/gacp";
-import type { ApplicantInfo, FarmInfo, ComplianceInfo, UploadedDocument, ApplicationType } from "@/types/application";
+import type { ApplicantInfo, FarmInfo, ComplianceInfo, CultivationInfo, UploadedDocument, ApplicationType } from "@/types/application";
 import { useState } from "react";
 
 interface Props {
   applicant: Partial<ApplicantInfo>;
   farm: Partial<FarmInfo>;
+  cultivation: Partial<CultivationInfo>;
   compliance: Partial<ComplianceInfo>;
   documents: UploadedDocument[];
   selectedPlant: string;
   applicationType: ApplicationType;
 }
 
-export default function StepConfirm({ applicant, farm, compliance, documents, selectedPlant, applicationType }: Props) {
+const cultivationMethodLabels: Record<string, string> = {
+  outdoor: "กลางแจ้ง", greenhouse: "โรงเรือน", indoor: "ในร่ม", hydroponic: "ไฮโดรโปนิกส์", mixed: "ผสมผสาน",
+};
+const fertilizerLabels: Record<string, string> = {
+  organic: "อินทรีย์", chemical: "เคมี", mixed: "ผสมผสาน", none: "ไม่ใช้",
+};
+const irrigationLabels: Record<string, string> = {
+  drip: "น้ำหยด", sprinkler: "สปริงเกลอร์", flood: "ท่วมขัง", manual: "รดน้ำด้วยมือ", rain_fed: "น้ำฝน",
+};
+const harvestLabels: Record<string, string> = {
+  manual: "เก็บมือ", mechanical: "เครื่องจักร", mixed: "ผสมผสาน",
+};
+const dryingLabels: Record<string, string> = {
+  sun_dry: "ตากแดด", shade_dry: "ตากในร่ม", oven: "อบ", dehumidifier: "ลดความชื้น", freeze_dry: "แช่แข็งอบแห้ง",
+};
+
+export default function StepConfirm({ applicant, farm, cultivation, compliance, documents, selectedPlant, applicationType }: Props) {
   const plant = PLANT_TYPES.find((p) => p.code === selectedPlant);
   const [checklist, setChecklist] = useState<boolean[]>(PRE_SUBMIT_CHECKLIST.map(() => false));
 
@@ -23,7 +40,6 @@ export default function StepConfirm({ applicant, farm, compliance, documents, se
   const missingDocs = requiredDocs.filter(d => !documents.some(u => u.docId === d.id));
 
   const isHighControl = plant?.controlLevel === "HIGH_CONTROL";
-  const checklistDone = checklist.every(Boolean);
 
   const toggleCheck = (i: number) => {
     const next = [...checklist];
@@ -76,8 +92,27 @@ export default function StepConfirm({ applicant, farm, compliance, documents, se
             { label: "แปลง", value: farm.farmName || "-" },
             { label: "พื้นที่", value: farm.areaRai ? `${farm.areaRai} ไร่` : "-" },
             { label: "จังหวัด", value: farm.province || "-" },
+            { label: "อำเภอ/ตำบล", value: `${farm.district || "-"} / ${farm.subDistrict || "-"}` },
             ...(farm.gpsLat && farm.gpsLng ? [{ label: "GPS", value: `${farm.gpsLat}, ${farm.gpsLng}` }] : []),
             ...(farm.landOwnership ? [{ label: "สิทธิ์ที่ดิน", value: farm.landOwnership === "owned" ? "เจ้าของ" : farm.landOwnership === "leased" ? "เช่า" : farm.landOwnership }] : []),
+          ]}
+        />
+
+        <SummaryCard
+          icon={Sprout}
+          title="แผนการเพาะปลูก"
+          items={[
+            { label: "สายพันธุ์", value: cultivation.seedVariety || "-" },
+            { label: "แหล่งพันธุ์", value: cultivation.seedSource || "-" },
+            { label: "วิธีปลูก", value: cultivationMethodLabels[cultivation.cultivationMethod || ""] || "-" },
+            { label: "เริ่มปลูก", value: cultivation.cultivationStartDate || "-" },
+            { label: "รอบปลูก", value: cultivation.growthCycleDays ? `${cultivation.growthCycleDays} วัน` : "-" },
+            { label: "ปุ๋ย", value: fertilizerLabels[cultivation.fertilizerType || ""] || "-" },
+            { label: "ระบบน้ำ", value: irrigationLabels[cultivation.irrigationType || ""] || "-" },
+            { label: "เก็บเกี่ยว", value: harvestLabels[cultivation.harvestMethod || ""] || "-" },
+            { label: "ผลผลิตคาด", value: cultivation.estimatedYieldKg ? `${cultivation.estimatedYieldKg} กก.` : "-" },
+            { label: "ทำแห้ง", value: dryingLabels[cultivation.dryingMethod || ""] || "-" },
+            { label: "ใช้สารเคมี", value: cultivation.pesticideUsage ? "✅ ใช้" : "❌ ไม่ใช้" },
           ]}
         />
 
@@ -91,6 +126,7 @@ export default function StepConfirm({ applicant, farm, compliance, documents, se
             { label: "Biometric", value: compliance?.hasBiometric ? "✅" : "❌" },
             { label: "Zoning", value: compliance?.hasZoning ? "✅" : "❌" },
             { label: "Inventory", value: compliance?.hasInventoryControl ? "✅" : "❌" },
+            { label: "SOP", value: `${Object.values(compliance?.sopCoverage || {}).filter(Boolean).length}/7 ขั้นตอน` },
           ]}
         />
 
@@ -126,7 +162,6 @@ export default function StepConfirm({ applicant, farm, compliance, documents, se
         </h4>
         <div className="space-y-1.5">
           {PRE_SUBMIT_CHECKLIST.map((item, i) => {
-            // Skip HIGH_CONTROL-only items for general plants
             if (!isHighControl && item.includes("HIGH_CONTROL")) return null;
             return (
               <label

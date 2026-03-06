@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 interface Props {
   value: Partial<ApplicantInfo>;
   onChange: (v: Partial<ApplicantInfo>) => void;
+  errors?: Record<string, string>;
 }
 
 const applicantTypes: { value: ApplicantType; label: string; desc: string }[] = [
@@ -16,7 +17,12 @@ const applicantTypes: { value: ApplicantType; label: string; desc: string }[] = 
   { value: "cooperative", label: "นิติบุคคล/สหกรณ์", desc: "บริษัท หรือ สหกรณ์การเกษตร" },
 ];
 
-export default function StepApplicantInfo({ value, onChange }: Props) {
+function FieldError({ error }: { error?: string }) {
+  if (!error) return null;
+  return <p className="text-[11px] text-destructive mt-0.5">{error}</p>;
+}
+
+export default function StepApplicantInfo({ value, onChange, errors = {} }: Props) {
   const update = (key: keyof ApplicantInfo, val: string | boolean) =>
     onChange({ ...value, [key]: val });
 
@@ -61,7 +67,9 @@ export default function StepApplicantInfo({ value, onChange }: Props) {
             placeholder="กรอกชื่อ-นามสกุล"
             value={value.fullName || ""}
             onChange={(e) => update("fullName", e.target.value)}
+            className={errors.fullName ? "border-destructive" : ""}
           />
+          <FieldError error={errors.fullName} />
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs">
@@ -72,7 +80,9 @@ export default function StepApplicantInfo({ value, onChange }: Props) {
             value={value.idCard || ""}
             onChange={(e) => update("idCard", e.target.value)}
             maxLength={17}
+            className={errors.idCard ? "border-destructive" : ""}
           />
+          <FieldError error={errors.idCard} />
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs">
@@ -82,7 +92,9 @@ export default function StepApplicantInfo({ value, onChange }: Props) {
             placeholder="0XX-XXX-XXXX"
             value={value.phone || ""}
             onChange={(e) => update("phone", e.target.value)}
+            className={errors.phone ? "border-destructive" : ""}
           />
+          <FieldError error={errors.phone} />
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs">อีเมล</Label>
@@ -91,7 +103,9 @@ export default function StepApplicantInfo({ value, onChange }: Props) {
             type="email"
             value={value.email || ""}
             onChange={(e) => update("email", e.target.value)}
+            className={errors.email ? "border-destructive" : ""}
           />
+          <FieldError error={errors.email} />
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs">ตำแหน่ง</Label>
@@ -113,7 +127,9 @@ export default function StepApplicantInfo({ value, onChange }: Props) {
           rows={2}
           value={value.address || ""}
           onChange={(e) => update("address", e.target.value)}
+          className={errors.address ? "border-destructive" : ""}
         />
+        <FieldError error={errors.address} />
       </div>
 
       {/* Organization info for enterprise/cooperative */}
@@ -129,7 +145,9 @@ export default function StepApplicantInfo({ value, onChange }: Props) {
                 placeholder="ชื่อองค์กร"
                 value={value.organizationName || ""}
                 onChange={(e) => update("organizationName", e.target.value)}
+                className={errors.organizationName ? "border-destructive" : ""}
               />
+              <FieldError error={errors.organizationName} />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">เลขทะเบียนนิติบุคคล</Label>

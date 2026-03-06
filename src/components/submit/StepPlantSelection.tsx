@@ -9,6 +9,7 @@ interface Props {
   onChange: (v: string) => void;
   applicationType: ApplicationType;
   onApplicationTypeChange: (v: ApplicationType) => void;
+  errors?: Record<string, string>;
 }
 
 const appTypeIcons: Record<ApplicationType, React.ElementType> = {
@@ -17,7 +18,7 @@ const appTypeIcons: Record<ApplicationType, React.ElementType> = {
   AMEND: Replace,
 };
 
-export default function StepPlantSelection({ value, onChange, applicationType, onApplicationTypeChange }: Props) {
+export default function StepPlantSelection({ value, onChange, applicationType, onApplicationTypeChange, errors = {} }: Props) {
   return (
     <div className="space-y-5">
       {/* Application Type */}
@@ -55,10 +56,13 @@ export default function StepPlantSelection({ value, onChange, applicationType, o
 
       {/* Plant Selection */}
       <div className="space-y-2">
-        <h3 className="text-sm font-semibold">เลือกชนิดสมุนไพรที่ต้องการขอรับรอง</h3>
+        <h3 className="text-sm font-semibold">เลือกชนิดสมุนไพรที่ต้องการขอรับรอง <span className="text-destructive">*</span></h3>
         <p className="text-xs text-muted-foreground">
           ชนิดพืชจะกำหนดเอกสารและข้อกำหนดความปลอดภัยที่ต้องใช้
         </p>
+        {errors.selectedPlant && (
+          <p className="text-[11px] text-destructive">{errors.selectedPlant}</p>
+        )}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
