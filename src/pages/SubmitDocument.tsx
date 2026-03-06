@@ -1,21 +1,33 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Check, FileText, MapPin, Upload, Shield, CreditCard, Send, Leaf } from "lucide-react";
+import { Check, FileText, MapPin, Upload, Shield, CreditCard, Send, Leaf, Sprout } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import StepApplicantInfo from "@/components/submit/StepApplicantInfo";
 import StepPlantSelection from "@/components/submit/StepPlantSelection";
 import StepFarmInfo from "@/components/submit/StepFarmInfo";
+import StepCultivation from "@/components/submit/StepCultivation";
 import StepCompliance from "@/components/submit/StepCompliance";
 import StepDocuments from "@/components/submit/StepDocuments";
 import StepPaymentPreview from "@/components/submit/StepPaymentPreview";
 import StepConfirm from "@/components/submit/StepConfirm";
-import type { ApplicantInfo, FarmInfo, ComplianceInfo, UploadedDocument, ApplicationType } from "@/types/application";
+import { PLANT_TYPES, getRelevantDocuments } from "@/constants/gacp";
+import {
+  applicantSchema,
+  plantSelectionSchema,
+  farmInfoSchema,
+  cultivationSchema,
+  complianceSchema,
+  validateComplianceForPlant,
+  getZodErrors,
+} from "@/lib/validations";
+import type { ApplicantInfo, FarmInfo, ComplianceInfo, CultivationInfo, UploadedDocument, ApplicationType } from "@/types/application";
 
 const steps = [
   { label: "ข้อมูลผู้ยื่น", icon: FileText },
   { label: "ชนิดสมุนไพร", icon: Leaf },
   { label: "พื้นที่เพาะปลูก", icon: MapPin },
+  { label: "แผนเพาะปลูก", icon: Sprout },
   { label: "ความปลอดภัย", icon: Shield },
   { label: "เอกสารแนบ", icon: Upload },
   { label: "ค่าธรรมเนียม", icon: CreditCard },
@@ -24,6 +36,8 @@ const steps = [
 
 export default function SubmitDocumentPage() {
   const [currentStep, setCurrentStep] = useState(0);
+  const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
+  const [attemptedNext, setAttemptedNext] = useState(false);
   const { toast } = useToast();
 
   const [applicationType, setApplicationType] = useState<ApplicationType>("NEW");
@@ -32,6 +46,14 @@ export default function SubmitDocumentPage() {
   });
   const [selectedPlant, setSelectedPlant] = useState("");
   const [farm, setFarm] = useState<Partial<FarmInfo>>({ landOwnership: "owned" });
+  const [cultivation, setCultivation] = useState<Partial<CultivationInfo>>({
+    cultivationMethod: "outdoor",
+    fertilizerType: "organic",
+    irrigationType: "drip",
+    harvestMethod: "manual",
+    dryingMethod: "shade_dry",
+    pesticideUsage: false,
+  });
   const [compliance, setCompliance] = useState<Partial<ComplianceInfo>>({
     hasCCTV: false,
     hasFencing: false,
@@ -49,6 +71,84 @@ export default function SubmitDocumentPage() {
   });
   const [documents, setDocuments] = useState<UploadedDocument[]>([]);
 
+  const plant = PLANT_TYPES.find((p) => p.code === selectedPlant);
+  const isHighControl = plant?.controlLevel === "HIGH_CONTROL";
+
+  const validateCurrentStep = (): boolean => {
+    let errors: Record<string, string> = {};
+
+    switch (currentStep) {
+      case 0: {
+        const result = applicantSchema.safeParse(applicant);
+        errors = getZodErrors(result);
+        break;
+      }
+      case 1: {
+        const result = plantSelectionSchema.safeParse({ selectedPlant, applicationType });
+        errors = getZodErrors(result);
+        break;
+      }
+      case 2: {
+        const result = farmInfoSchema.safeParse(farm);
+        errors = getZodErrors(result);
+        break;
+      }
+      case 3: {
+        const result = cultivationSchema.safeParse(cultivation);
+        errors = getZodErrors(result);
+        break;
+      }
+      case 4: {
+        const result = complianceSchema.safeParse(compliance);
+        errors = getZodErrors(result);
+        // Additional plant-specific validation
+        if (Object.keys(errors).length === 0 && plant) {
+          const complianceErrors = validateComplianceForPlant(
+            compliance as any,
+            plant.controlLevel,
+            plant.code
+          );
+          if (complianceErrors.length > 0) {
+            errors["_compliance"] = complianceErrors.join("; ");
+          }
+        }
+        break;
+      }
+      case 5: {
+        // Document validation
+        const relevantDocs = getRelevantDocuments(selectedPlant, applicationType);
+        const requiredIds = relevantDocs.filter((d) => d.required).map((d) => d.id);
+        const uploadedIds = documents.map((d) => d.docId);
+        const missing = requiredIds.filter((id) => !uploadedIds.includes(id));
+        if (missing.length > 0) {
+          errors["_documents"] = `ยังขาดเอกสารบังคับ ${missing.length} รายการ`;
+        }
+        break;
+      }
+      // Steps 6 (payment preview) and 7 (confirm) always pass
+      default:
+        break;
+    }
+
+    setStepErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleNext = () => {
+    setAttemptedNext(true);
+    if (validateCurrentStep()) {
+      setStepErrors({});
+      setAttemptedNext(false);
+      setCurrentStep(currentStep + 1);
+    } else {
+      toast({
+        title: "กรุณาตรวจสอบข้อมูล",
+        description: "มีข้อมูลที่ยังไม่ครบ กรุณากรอกให้ครบถ้วน",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSubmit = () => {
     toast({
       title: "ยื่นคำขอสำเร็จ",
@@ -57,14 +157,8 @@ export default function SubmitDocumentPage() {
     setCurrentStep(0);
   };
 
-  const canGoNext = () => {
-    switch (currentStep) {
-      case 0: return applicant.fullName && applicant.idCard && applicant.phone && applicant.address;
-      case 1: return !!selectedPlant;
-      case 2: return farm.farmName && farm.province && farm.landOwnership;
-      default: return true;
-    }
-  };
+  // Error count badge for stepper
+  const errorCount = Object.keys(stepErrors).length;
 
   return (
     <div className="space-y-6 pb-20 md:pb-6">
@@ -106,6 +200,21 @@ export default function SubmitDocumentPage() {
         })}
       </div>
 
+      {/* Validation Error Banner */}
+      {attemptedNext && errorCount > 0 && (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+          <p className="text-xs font-medium text-destructive">
+            ⚠️ พบข้อผิดพลาด {errorCount} รายการ กรุณาตรวจสอบข้อมูลด้านล่าง
+          </p>
+          {stepErrors["_compliance"] && (
+            <p className="mt-1 text-[11px] text-destructive">{stepErrors["_compliance"]}</p>
+          )}
+          {stepErrors["_documents"] && (
+            <p className="mt-1 text-[11px] text-destructive">{stepErrors["_documents"]}</p>
+          )}
+        </div>
+      )}
+
       {/* Step Content */}
       <motion.div
         key={currentStep}
@@ -114,7 +223,7 @@ export default function SubmitDocumentPage() {
         className="rounded-xl border border-border bg-card p-4 card-shadow md:p-6"
       >
         {currentStep === 0 && (
-          <StepApplicantInfo value={applicant} onChange={setApplicant} />
+          <StepApplicantInfo value={applicant} onChange={setApplicant} errors={attemptedNext ? stepErrors : {}} />
         )}
         {currentStep === 1 && (
           <StepPlantSelection
@@ -122,15 +231,24 @@ export default function SubmitDocumentPage() {
             onChange={setSelectedPlant}
             applicationType={applicationType}
             onApplicationTypeChange={setApplicationType}
+            errors={attemptedNext ? stepErrors : {}}
           />
         )}
         {currentStep === 2 && (
-          <StepFarmInfo value={farm} onChange={setFarm} />
+          <StepFarmInfo value={farm} onChange={setFarm} errors={attemptedNext ? stepErrors : {}} />
         )}
         {currentStep === 3 && (
-          <StepCompliance value={compliance} onChange={setCompliance} selectedPlant={selectedPlant} />
+          <StepCultivation
+            value={cultivation}
+            onChange={setCultivation}
+            errors={attemptedNext ? stepErrors : {}}
+            isHighControl={isHighControl}
+          />
         )}
         {currentStep === 4 && (
+          <StepCompliance value={compliance} onChange={setCompliance} selectedPlant={selectedPlant} errors={attemptedNext ? stepErrors : {}} />
+        )}
+        {currentStep === 5 && (
           <StepDocuments
             documents={documents}
             onChange={setDocuments}
@@ -138,13 +256,14 @@ export default function SubmitDocumentPage() {
             applicationType={applicationType}
           />
         )}
-        {currentStep === 5 && (
+        {currentStep === 6 && (
           <StepPaymentPreview />
         )}
-        {currentStep === 6 && (
+        {currentStep === 7 && (
           <StepConfirm
             applicant={applicant}
             farm={farm}
+            cultivation={cultivation}
             compliance={compliance}
             documents={documents}
             selectedPlant={selectedPlant}
@@ -157,13 +276,17 @@ export default function SubmitDocumentPage() {
       <div className="flex justify-between gap-3">
         <Button
           variant="outline"
-          onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+          onClick={() => {
+            setStepErrors({});
+            setAttemptedNext(false);
+            setCurrentStep(Math.max(0, currentStep - 1));
+          }}
           disabled={currentStep === 0}
         >
           ย้อนกลับ
         </Button>
         {currentStep < steps.length - 1 ? (
-          <Button onClick={() => setCurrentStep(currentStep + 1)} disabled={!canGoNext()}>
+          <Button onClick={handleNext}>
             ถัดไป
           </Button>
         ) : (

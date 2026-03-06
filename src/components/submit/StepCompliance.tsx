@@ -4,16 +4,17 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PLANT_TYPES, SOP_STEPS } from "@/constants/gacp";
-import { ShieldAlert, Camera, Lock, ClipboardList, Fingerprint, ShieldCheck, MapPin, Package, CheckCircle2 } from "lucide-react";
+import { ShieldAlert, Camera, Lock, ClipboardList, Fingerprint, ShieldCheck, MapPin, Package } from "lucide-react";
 import type { ComplianceInfo } from "@/types/application";
 
 interface Props {
   value: Partial<ComplianceInfo>;
   onChange: (v: Partial<ComplianceInfo>) => void;
   selectedPlant: string;
+  errors?: Record<string, string>;
 }
 
-export default function StepCompliance({ value, onChange, selectedPlant }: Props) {
+export default function StepCompliance({ value, onChange, selectedPlant, errors = {} }: Props) {
   const plant = PLANT_TYPES.find((p) => p.code === selectedPlant);
   const isHighControl = plant?.controlLevel === "HIGH_CONTROL";
 
@@ -56,6 +57,11 @@ export default function StepCompliance({ value, onChange, selectedPlant }: Props
             </p>
           </div>
         )}
+        {errors["_compliance"] && (
+          <div className="mt-2 rounded-lg border border-destructive/20 bg-destructive/5 p-3">
+            <p className="text-xs font-medium text-destructive">⚠️ {errors["_compliance"]}</p>
+          </div>
+        )}
       </div>
 
       {/* Security Items */}
@@ -65,7 +71,7 @@ export default function StepCompliance({ value, onChange, selectedPlant }: Props
           <div
             key={item.key}
             className={`flex items-center justify-between rounded-lg border p-3 transition-colors ${
-              value[item.key] ? "border-success/30 bg-success/5" : "border-border"
+              value[item.key] ? "border-success/30 bg-success/5" : item.required && !value[item.key] ? "border-destructive/30" : "border-border"
             }`}
           >
             <div className="flex items-center gap-3">
@@ -113,7 +119,11 @@ export default function StepCompliance({ value, onChange, selectedPlant }: Props
                 placeholder="≥ 2.0"
                 value={value.fenceHeight || ""}
                 onChange={(e) => onChange({ ...value, fenceHeight: parseFloat(e.target.value) })}
+                className={errors.fenceHeight ? "border-destructive" : ""}
               />
+              {value.fenceHeight !== undefined && value.fenceHeight < 2 && (
+                <p className="text-[11px] text-destructive">รั้วต้องสูง ≥ 2 เมตร</p>
+              )}
             </div>
           )}
         </div>
@@ -122,7 +132,7 @@ export default function StepCompliance({ value, onChange, selectedPlant }: Props
       {/* SOP Coverage Checklist */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h4 className="text-xs font-semibold text-foreground">SOP ครอบคลุม 7 ขั้นตอนหลัก</h4>
+          <h4 className="text-xs font-semibold text-foreground">SOP ครอบคลุม 7 ขั้นตอนหลัก <span className="text-destructive">*</span></h4>
           <span className={`text-[10px] font-medium ${sopCompleted === 7 ? "text-success" : "text-warning"}`}>
             {sopCompleted}/7 ขั้นตอน
           </span>

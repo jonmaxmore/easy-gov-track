@@ -1,5 +1,6 @@
 // GACP Application State Machine & Types
 // Based on canonical workflow: https://github.com/jonmaxmore/GACP-Certification-Application
+// + GACP Thailand standards from DTAM (กรมการแพทย์แผนไทยฯ)
 
 export type ApplicationStatus =
   | "DRAFT"
@@ -27,6 +28,16 @@ export type ApplicantType = "individual" | "enterprise" | "cooperative";
 export type ApplicationType = "NEW" | "RENEW" | "AMEND";
 
 export type LandOwnershipType = "owned" | "leased" | "government" | "community";
+
+export type CultivationMethod = "outdoor" | "greenhouse" | "indoor" | "hydroponic" | "mixed";
+
+export type FertilizerType = "organic" | "chemical" | "mixed" | "none";
+
+export type IrrigationType = "drip" | "sprinkler" | "flood" | "manual" | "rain_fed";
+
+export type HarvestMethod = "manual" | "mechanical" | "mixed";
+
+export type DryingMethod = "sun_dry" | "shade_dry" | "oven" | "dehumidifier" | "freeze_dry";
 
 export interface PlantType {
   code: string;
@@ -93,6 +104,58 @@ export interface FarmInfo {
   soilType?: string;
 }
 
+export interface CultivationInfo {
+  // Seed / Variety
+  seedVariety: string;
+  seedSource: string;
+  seedCertification?: string;
+  plantAge?: string;
+
+  // Cultivation
+  cultivationMethod: CultivationMethod;
+  cultivationStartDate: string;
+  growthCycleDays: number;
+  plantingDensity?: string;
+  numberOfPlants?: number;
+
+  // Fertilizer
+  fertilizerType: FertilizerType;
+  fertilizerDetails: string;
+  fertilizerFrequency: string;
+  organicCertified?: boolean;
+  compostSource?: string;
+
+  // Irrigation
+  irrigationType: IrrigationType;
+  irrigationFrequency: string;
+  waterQualityTest?: boolean;
+  waterTestDate?: string;
+
+  // Harvesting
+  expectedHarvestDate: string;
+  harvestMethod: HarvestMethod;
+  harvestCriteria: string;
+  estimatedYieldKg: number;
+
+  // Post-harvest
+  dryingMethod: DryingMethod;
+  dryingTemperature?: string;
+  dryingDuration?: string;
+  trimmingMethod?: string;
+  packagingMethod?: string;
+  storageCondition?: string;
+  storageTemperature?: string;
+
+  // Quality Control
+  qualityControlMeasures: string;
+  samplingFrequency?: string;
+  labTestingPlan?: string;
+  pesticideUsage: boolean;
+  pesticideDetails?: string;
+  heavyMetalTest?: boolean;
+  microbialTest?: boolean;
+}
+
 export interface ApplicantInfo {
   fullName: string;
   idCard: string;
@@ -139,6 +202,7 @@ export interface Application {
   applicationType: ApplicationType;
   applicant: ApplicantInfo;
   farm: FarmInfo;
+  cultivation: CultivationInfo;
   compliance: ComplianceInfo;
   documents: UploadedDocument[];
   status: ApplicationStatus;
