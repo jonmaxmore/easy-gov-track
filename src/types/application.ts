@@ -39,6 +39,16 @@ export type HarvestMethod = "manual" | "mechanical" | "mixed";
 
 export type DryingMethod = "sun_dry" | "shade_dry" | "oven" | "dehumidifier" | "freeze_dry";
 
+export type PropagationMethod = "seed" | "cutting" | "tissue_culture" | "rhizome" | "division" | "layering";
+
+export type SoilPreparationMethod = "plowing" | "raised_bed" | "no_till" | "composting" | "mulching";
+
+export type PestControlMethod = "ipm" | "biological" | "chemical" | "organic" | "physical" | "none";
+
+export type WeedControlMethod = "manual_weeding" | "mulching" | "cover_crop" | "herbicide" | "mechanical" | "none";
+
+export type CleaningMethod = "water_wash" | "brush_clean" | "air_blow" | "no_wash";
+
 export interface PlantType {
   code: string;
   nameTh: string;
@@ -104,56 +114,192 @@ export interface FarmInfo {
   soilType?: string;
 }
 
-export interface CultivationInfo {
-  // Seed / Variety
+// ─── Cultivation (Deep-dive GACP) ────────────────────────────
+
+export interface SoilPreparation {
+  method: SoilPreparationMethod;
+  soilTestDate?: string;
+  soilPH?: number;
+  organicMatter?: string; // e.g. "2.5%"
+  soilAmendments: string; // เช่น ปูนโดโลไมต์ 200 กก./ไร่
+  preparationDate: string;
+  tillageDepth?: string; // ความลึกในการไถ เช่น 30 ซม.
+}
+
+export interface SeedlingInfo {
+  propagationMethod: PropagationMethod;
   seedVariety: string;
   seedSource: string;
   seedCertification?: string;
+  seedLotNumber?: string;
+  germinationRate?: number; // %
+  nurseryDuration?: string; // ระยะเวลาเพาะกล้า เช่น 30 วัน
+  nurseryMethod?: string; // วิธีเพาะกล้า
   plantAge?: string;
+  seedTreatment?: string; // การเตรียมเมล็ด เช่น แช่น้ำ 24 ชม.
+}
+
+export interface FertilizerSchedule {
+  stage: string; // ระยะการเติบโต เช่น "ระยะกล้า", "ระยะเจริญเติบโต", "ระยะออกดอก"
+  fertilizerName: string;
+  formula?: string; // สูตรปุ๋ย เช่น 15-15-15
+  ratePerRai: string; // อัตราการใช้ต่อไร่
+  applicationMethod: string; // วิธีใส่ เช่น หว่าน, โรย, ผสมน้ำ
+  frequency: string; // ความถี่
+}
+
+export interface PestDiseaseManagement {
+  controlMethod: PestControlMethod;
+  commonPests: string; // ศัตรูพืชที่พบบ่อย
+  commonDiseases: string; // โรคพืชที่พบบ่อย
+  preventionMeasures: string; // มาตรการป้องกัน
+  biologicalAgents?: string; // ตัวห้ำ/ตัวเบียน
+  chemicalUsed?: string; // สารเคมีที่ใช้ (ถ้ามี)
+  chemicalFrequency?: string;
+  withdrawalPeriodDays?: number; // ระยะหยุดใช้ก่อนเก็บเกี่ยว (วัน)
+  ipmStrategy?: string; // กลยุทธ์ IPM
+  weedControl: WeedControlMethod;
+  weedControlDetails?: string;
+}
+
+export interface IrrigationPlan {
+  irrigationType: IrrigationType;
+  irrigationFrequency: string;
+  waterSource: string;
+  waterQualityTest: boolean;
+  waterTestDate?: string;
+  waterTestLab?: string;
+  phLevel?: number;
+  ecLevel?: number; // ค่าการนำไฟฟ้า
+  waterScheduleByStage?: string; // ปริมาณน้ำตามระยะการเจริญเติบโต
+}
+
+export interface EnvironmentalMonitoring {
+  hasTemperatureLog: boolean;
+  hasHumidityLog: boolean;
+  hasRainfallLog: boolean;
+  hasLightIntensityLog: boolean;
+  monitoringFrequency: string; // เช่น "ทุกวัน", "สัปดาห์ละครั้ง"
+  monitoringEquipment?: string; // เช่น เทอร์โมมิเตอร์ ไฮโกรมิเตอร์
+  optimalTempRange?: string; // เช่น 25-35°C
+  optimalHumidityRange?: string; // เช่น 60-80%
+}
+
+export interface HarvestInfo {
+  harvestMethod: HarvestMethod;
+  expectedHarvestDate: string;
+  harvestCriteria: string;
+  maturityIndicators: string; // ตัวชี้วัดความสมบูรณ์ เช่น สีใบ, ขนาดเหง้า
+  activeIngredientTarget?: string; // ปริมาณสารสำคัญเป้าหมาย
+  harvestTime?: string; // ช่วงเวลาเก็บ เช่น เช้ามืด, ก่อนแดดจัด
+  harvestTools: string; // เครื่องมือ เช่น มีดคม กรรไกร ตะกร้า
+  estimatedYieldKg: number;
+  yieldPerRai?: number;
+  numberOfHarvestsPerYear?: number;
+  harvestSeasons?: string; // ฤดูกาลเก็บเกี่ยว
+}
+
+export interface PostHarvestInfo {
+  // Cleaning
+  cleaningMethod: CleaningMethod;
+  cleaningDetails?: string;
+
+  // Drying
+  dryingMethod: DryingMethod;
+  dryingTemperature?: string;
+  dryingDuration?: string;
+  targetMoistureContent?: string; // ความชื้นเป้าหมาย เช่น 10%
+  dryingEquipment?: string;
+
+  // Trimming / Processing
+  trimmingMethod?: string;
+  sortingCriteria?: string; // เกณฑ์การคัดเลือก เช่น ขนาด สี กลิ่น
+  processingMethod?: string; // การแปรรูป เช่น บด ฝาน หั่น
+
+  // Packaging
+  packagingMethod?: string;
+  packagingMaterial?: string; // วัสดุบรรจุ เช่น ถุง PE, ถุงอลูมิเนียม
+  labelingInfo?: string; // ข้อมูลบนฉลาก
+  batchTraceability: boolean; // ระบบ Lot/Batch
+
+  // Storage
+  storageCondition?: string;
+  storageTemperature?: string;
+  storageHumidity?: string;
+  storageDuration?: string; // อายุการเก็บ
+  storageContainerType?: string; // ภาชนะจัดเก็บ
+
+  // Waste
+  wasteManagementPlan: string; // แผนจัดการของเสีย
+  compostingPlan?: string;
+}
+
+export interface QualityControl {
+  qualityControlMeasures: string;
+  samplingFrequency: string;
+  labTestingPlan: string;
+  labName?: string; // ชื่อห้องปฏิบัติการ
+  pesticideResidueTest: boolean;
+  heavyMetalTest: boolean;
+  microbialTest: boolean;
+  aflatoxinTest?: boolean;
+  activeIngredientTest?: boolean;
+  moistureTest?: boolean;
+  testFrequency?: string; // ความถี่การส่งตรวจ
+  acceptanceCriteria?: string; // เกณฑ์การยอมรับ
+  rejectionProcedure?: string; // ขั้นตอนเมื่อไม่ผ่าน
+  recordKeepingMethod: string; // วิธีบันทึก เช่น สมุดบันทึก, แอป, Excel
+}
+
+export interface CropRotation {
+  hasCropRotation: boolean;
+  rotationPlan?: string; // เช่น ปลูกถั่วสลับ, พักดิน 3 เดือน
+  previousCrop?: string; // พืชที่ปลูกก่อนหน้า
+  fallowPeriod?: string; // ระยะพักดิน
+}
+
+export interface CultivationInfo {
+  // Soil Preparation
+  soilPreparation: SoilPreparation;
+
+  // Seedling
+  seedling: SeedlingInfo;
 
   // Cultivation
   cultivationMethod: CultivationMethod;
   cultivationStartDate: string;
   growthCycleDays: number;
   plantingDensity?: string;
+  plantingSpacing?: string; // ระยะปลูก เช่น 50x50 ซม.
   numberOfPlants?: number;
+  rowDirection?: string; // ทิศทางแถว เช่น เหนือ-ใต้
 
   // Fertilizer
   fertilizerType: FertilizerType;
-  fertilizerDetails: string;
-  fertilizerFrequency: string;
+  fertilizerSchedule: FertilizerSchedule[];
   organicCertified?: boolean;
   compostSource?: string;
 
+  // Pest & Disease
+  pestManagement: PestDiseaseManagement;
+
   // Irrigation
-  irrigationType: IrrigationType;
-  irrigationFrequency: string;
-  waterQualityTest?: boolean;
-  waterTestDate?: string;
+  irrigation: IrrigationPlan;
+
+  // Environmental
+  environmentalMonitoring: EnvironmentalMonitoring;
 
   // Harvesting
-  expectedHarvestDate: string;
-  harvestMethod: HarvestMethod;
-  harvestCriteria: string;
-  estimatedYieldKg: number;
+  harvest: HarvestInfo;
 
   // Post-harvest
-  dryingMethod: DryingMethod;
-  dryingTemperature?: string;
-  dryingDuration?: string;
-  trimmingMethod?: string;
-  packagingMethod?: string;
-  storageCondition?: string;
-  storageTemperature?: string;
+  postHarvest: PostHarvestInfo;
 
   // Quality Control
-  qualityControlMeasures: string;
-  samplingFrequency?: string;
-  labTestingPlan?: string;
-  pesticideUsage: boolean;
-  pesticideDetails?: string;
-  heavyMetalTest?: boolean;
-  microbialTest?: boolean;
+  qualityControl: QualityControl;
+
+  // Crop Rotation
+  cropRotation: CropRotation;
 }
 
 export interface ApplicantInfo {
