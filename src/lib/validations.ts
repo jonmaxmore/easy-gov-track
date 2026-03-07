@@ -57,59 +57,161 @@ export const farmInfoSchema = z.object({
   gpsLng: z.number().min(97, "ลองจิจูดของไทยอยู่ระหว่าง 97-106").max(106, "ลองจิจูดของไทยอยู่ระหว่าง 97-106").optional().or(z.nan()),
 });
 
-// ─── Step 3: Cultivation Plan ────────────────────────────────
+// ─── Step 3: Cultivation Plan (Deep-dive) ────────────────────
 
 export const cultivationSchema = z.object({
-  seedVariety: z.string().min(1, "กรุณาระบุสายพันธุ์"),
-  seedSource: z.string().min(1, "กรุณาระบุแหล่งที่มาเมล็ดพันธุ์/กิ่งพันธุ์"),
-  seedCertification: z.string().optional(),
-  plantAge: z.string().optional(),
+  // Soil Preparation
+  soilPreparation: z.object({
+    method: z.string().min(1, "กรุณาเลือกวิธีเตรียมดิน"),
+    preparationDate: z.string().min(1, "กรุณาระบุวันที่เตรียมดิน"),
+    soilAmendments: z.string().min(1, "กรุณาระบุสารปรับปรุงดิน"),
+    soilTestDate: z.string().optional(),
+    soilPH: z.number().optional(),
+    organicMatter: z.string().optional(),
+    tillageDepth: z.string().optional(),
+  }).optional().default({}),
 
+  // Seedling
+  seedling: z.object({
+    propagationMethod: z.string().min(1, "กรุณาเลือกวิธีขยายพันธุ์"),
+    seedVariety: z.string().min(1, "กรุณาระบุสายพันธุ์"),
+    seedSource: z.string().min(1, "กรุณาระบุแหล่งที่มาเมล็ดพันธุ์"),
+    seedCertification: z.string().optional(),
+    seedLotNumber: z.string().optional(),
+    germinationRate: z.number().optional(),
+    nurseryDuration: z.string().optional(),
+    nurseryMethod: z.string().optional(),
+    plantAge: z.string().optional(),
+    seedTreatment: z.string().optional(),
+  }).optional().default({}),
+
+  // Cultivation
   cultivationMethod: z.enum(["outdoor", "greenhouse", "indoor", "hydroponic", "mixed"]),
   cultivationStartDate: z.string().min(1, "กรุณาระบุวันที่เริ่มปลูก"),
   growthCycleDays: z.number({ invalid_type_error: "กรุณาระบุรอบการเจริญเติบโต" }).min(1, "ต้องมากกว่า 0 วัน"),
   plantingDensity: z.string().optional(),
+  plantingSpacing: z.string().optional(),
   numberOfPlants: z.number().optional(),
+  rowDirection: z.string().optional(),
 
+  // Fertilizer
   fertilizerType: z.enum(["organic", "chemical", "mixed", "none"]),
-  fertilizerDetails: z.string().min(1, "กรุณาระบุรายละเอียดปุ๋ย/สารอาหาร"),
-  fertilizerFrequency: z.string().min(1, "กรุณาระบุความถี่ในการใส่ปุ๋ย"),
+  fertilizerSchedule: z.array(z.object({
+    stage: z.string(),
+    fertilizerName: z.string(),
+    formula: z.string().optional(),
+    ratePerRai: z.string(),
+    applicationMethod: z.string(),
+    frequency: z.string(),
+  })).min(1, "กรุณาเพิ่มตารางปุ๋ยอย่างน้อย 1 ระยะ"),
   organicCertified: z.boolean().optional(),
   compostSource: z.string().optional(),
 
-  irrigationType: z.enum(["drip", "sprinkler", "flood", "manual", "rain_fed"]),
-  irrigationFrequency: z.string().min(1, "กรุณาระบุความถี่ในการให้น้ำ"),
-  waterQualityTest: z.boolean().optional(),
-  waterTestDate: z.string().optional(),
+  // Pest Management
+  pestManagement: z.object({
+    controlMethod: z.string().min(1, "กรุณาเลือกวิธีควบคุมศัตรูพืช"),
+    commonPests: z.string().min(1, "กรุณาระบุศัตรูพืชที่พบบ่อย"),
+    commonDiseases: z.string().min(1, "กรุณาระบุโรคพืชที่พบบ่อย"),
+    preventionMeasures: z.string().min(1, "กรุณาระบุมาตรการป้องกัน"),
+    weedControl: z.string().min(1, "กรุณาเลือกวิธีจัดการวัชพืช"),
+    biologicalAgents: z.string().optional(),
+    chemicalUsed: z.string().optional(),
+    chemicalFrequency: z.string().optional(),
+    withdrawalPeriodDays: z.number().optional(),
+    ipmStrategy: z.string().optional(),
+    weedControlDetails: z.string().optional(),
+  }).optional().default({}),
 
-  expectedHarvestDate: z.string().min(1, "กรุณาระบุวันที่คาดว่าจะเก็บเกี่ยว"),
-  harvestMethod: z.enum(["manual", "mechanical", "mixed"]),
-  harvestCriteria: z.string().min(1, "กรุณาระบุเกณฑ์การเก็บเกี่ยว (เช่น อายุ, ลักษณะ)"),
-  estimatedYieldKg: z.number({ invalid_type_error: "กรุณาระบุผลผลิตที่คาด" }).min(0.1, "ต้องมากกว่า 0"),
+  // Irrigation
+  irrigation: z.object({
+    irrigationType: z.string().min(1, "กรุณาเลือกระบบการให้น้ำ"),
+    irrigationFrequency: z.string().min(1, "กรุณาระบุความถี่ในการให้น้ำ"),
+    waterSource: z.string().min(1, "กรุณาระบุแหล่งน้ำ"),
+    waterQualityTest: z.boolean().optional(),
+    waterTestDate: z.string().optional(),
+    waterTestLab: z.string().optional(),
+    phLevel: z.number().optional(),
+    ecLevel: z.number().optional(),
+    waterScheduleByStage: z.string().optional(),
+  }).optional().default({}),
 
-  dryingMethod: z.enum(["sun_dry", "shade_dry", "oven", "dehumidifier", "freeze_dry"]),
-  dryingTemperature: z.string().optional(),
-  dryingDuration: z.string().optional(),
-  trimmingMethod: z.string().optional(),
-  packagingMethod: z.string().optional(),
-  storageCondition: z.string().optional(),
-  storageTemperature: z.string().optional(),
+  // Environmental Monitoring
+  environmentalMonitoring: z.object({
+    hasTemperatureLog: z.boolean().optional(),
+    hasHumidityLog: z.boolean().optional(),
+    hasRainfallLog: z.boolean().optional(),
+    hasLightIntensityLog: z.boolean().optional(),
+    monitoringFrequency: z.string().min(1, "กรุณาระบุความถี่ตรวจวัด"),
+    monitoringEquipment: z.string().optional(),
+    optimalTempRange: z.string().optional(),
+    optimalHumidityRange: z.string().optional(),
+  }).optional().default({}),
 
-  qualityControlMeasures: z.string().min(1, "กรุณาระบุมาตรการควบคุมคุณภาพ"),
-  samplingFrequency: z.string().optional(),
-  labTestingPlan: z.string().optional(),
-  pesticideUsage: z.boolean(),
-  pesticideDetails: z.string().optional(),
-  heavyMetalTest: z.boolean().optional(),
-  microbialTest: z.boolean().optional(),
-}).superRefine((data, ctx) => {
-  if (data.pesticideUsage && (!data.pesticideDetails || data.pesticideDetails.trim() === "")) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "กรุณาระบุรายละเอียดสารเคมีที่ใช้",
-      path: ["pesticideDetails"],
-    });
-  }
+  // Harvest
+  harvest: z.object({
+    harvestMethod: z.string().min(1, "กรุณาเลือกวิธีเก็บเกี่ยว"),
+    expectedHarvestDate: z.string().min(1, "กรุณาระบุวันที่คาดว่าจะเก็บเกี่ยว"),
+    harvestCriteria: z.string().min(1, "กรุณาระบุเกณฑ์การเก็บเกี่ยว"),
+    maturityIndicators: z.string().min(1, "กรุณาระบุตัวชี้วัดความสมบูรณ์"),
+    harvestTools: z.string().min(1, "กรุณาระบุเครื่องมือเก็บเกี่ยว"),
+    estimatedYieldKg: z.number({ invalid_type_error: "กรุณาระบุผลผลิตที่คาด" }).min(0.1, "ต้องมากกว่า 0"),
+    activeIngredientTarget: z.string().optional(),
+    harvestTime: z.string().optional(),
+    yieldPerRai: z.number().optional(),
+    numberOfHarvestsPerYear: z.number().optional(),
+    harvestSeasons: z.string().optional(),
+  }).optional().default({}),
+
+  // Post-harvest
+  postHarvest: z.object({
+    cleaningMethod: z.string().min(1, "กรุณาเลือกวิธีทำความสะอาด"),
+    cleaningDetails: z.string().optional(),
+    dryingMethod: z.string().min(1, "กรุณาเลือกวิธีทำแห้ง"),
+    dryingTemperature: z.string().optional(),
+    dryingDuration: z.string().optional(),
+    targetMoistureContent: z.string().optional(),
+    dryingEquipment: z.string().optional(),
+    trimmingMethod: z.string().optional(),
+    sortingCriteria: z.string().optional(),
+    processingMethod: z.string().optional(),
+    packagingMethod: z.string().optional(),
+    packagingMaterial: z.string().optional(),
+    labelingInfo: z.string().optional(),
+    batchTraceability: z.boolean().optional(),
+    storageCondition: z.string().optional(),
+    storageTemperature: z.string().optional(),
+    storageHumidity: z.string().optional(),
+    storageDuration: z.string().optional(),
+    storageContainerType: z.string().optional(),
+    wasteManagementPlan: z.string().min(1, "กรุณาระบุแผนจัดการของเสีย"),
+    compostingPlan: z.string().optional(),
+  }).optional().default({}),
+
+  // Quality Control
+  qualityControl: z.object({
+    qualityControlMeasures: z.string().min(1, "กรุณาระบุมาตรการควบคุมคุณภาพ"),
+    samplingFrequency: z.string().min(1, "กรุณาระบุความถี่สุ่มตัวอย่าง"),
+    labTestingPlan: z.string().min(1, "กรุณาระบุแผนส่งตรวจ"),
+    labName: z.string().optional(),
+    pesticideResidueTest: z.boolean().optional(),
+    heavyMetalTest: z.boolean().optional(),
+    microbialTest: z.boolean().optional(),
+    aflatoxinTest: z.boolean().optional(),
+    activeIngredientTest: z.boolean().optional(),
+    moistureTest: z.boolean().optional(),
+    testFrequency: z.string().optional(),
+    acceptanceCriteria: z.string().optional(),
+    rejectionProcedure: z.string().optional(),
+    recordKeepingMethod: z.string().min(1, "กรุณาระบุวิธีบันทึกข้อมูล"),
+  }).optional().default({}),
+
+  // Crop Rotation
+  cropRotation: z.object({
+    hasCropRotation: z.boolean().optional(),
+    rotationPlan: z.string().optional(),
+    previousCrop: z.string().optional(),
+    fallowPeriod: z.string().optional(),
+  }).optional().default({}),
 });
 
 // ─── Step 4: Compliance ──────────────────────────────────────
@@ -164,7 +266,6 @@ export function validateComplianceForPlant(
     errors.push("กัญชาต้องมีระบบ Biometric / Key Card");
   }
 
-  // SOP must cover all 7 steps
   const sopCoverage = compliance.sopCoverage;
   const sopCount = Object.values(sopCoverage).filter(Boolean).length;
   if (sopCount < 7) {
@@ -180,8 +281,7 @@ export function validateDocuments(
   uploadedDocIds: string[],
   requiredDocIds: string[]
 ): string[] {
-  const missing = requiredDocIds.filter((id) => !uploadedDocIds.includes(id));
-  return missing;
+  return requiredDocIds.filter((id) => !uploadedDocIds.includes(id));
 }
 
 // ─── Helper: get errors as Record<string, string> ────────────
