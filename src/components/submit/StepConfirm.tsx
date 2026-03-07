@@ -47,6 +47,13 @@ export default function StepConfirm({ applicant, farm, cultivation, compliance, 
     setChecklist(next);
   };
 
+  // Safe nested access
+  const seed = cultivation.seedling || {} as any;
+  const harv = cultivation.harvest || {} as any;
+  const post = cultivation.postHarvest || {} as any;
+  const irr = cultivation.irrigation || {} as any;
+  const qc = cultivation.qualityControl || {} as any;
+
   return (
     <div className="space-y-5">
       <div className="text-center">
@@ -60,87 +67,59 @@ export default function StepConfirm({ applicant, farm, cultivation, compliance, 
         </p>
       </div>
 
-      {/* Summary Cards */}
       <div className="space-y-3">
-        <SummaryCard
-          icon={User}
-          title="ผู้ยื่นคำขอ"
-          items={[
-            { label: "ชื่อ", value: applicant.fullName || "-" },
-            { label: "เลขบัตร", value: applicant.idCard || "-" },
-            { label: "โทร", value: applicant.phone || "-" },
-            { label: "ประเภท", value: applicant.applicantType === "individual" ? "รายบุคคล" : applicant.applicantType === "enterprise" ? "วิสาหกิจชุมชน" : "นิติบุคคล" },
-            ...(applicant.address ? [{ label: "ที่อยู่", value: applicant.address }] : []),
-            ...(applicant.organizationName ? [{ label: "องค์กร", value: applicant.organizationName }] : []),
-          ]}
-        />
+        <SummaryCard icon={User} title="ผู้ยื่นคำขอ" items={[
+          { label: "ชื่อ", value: applicant.fullName || "-" },
+          { label: "เลขบัตร", value: applicant.idCard || "-" },
+          { label: "โทร", value: applicant.phone || "-" },
+          { label: "ประเภท", value: applicant.applicantType === "individual" ? "รายบุคคล" : applicant.applicantType === "enterprise" ? "วิสาหกิจชุมชน" : "นิติบุคคล" },
+          ...(applicant.organizationName ? [{ label: "องค์กร", value: applicant.organizationName }] : []),
+        ]} />
 
-        <SummaryCard
-          icon={Leaf}
-          title="ชนิดสมุนไพรและประเภทคำขอ"
-          items={[
-            { label: "พืช", value: plant ? `${plant.nameTh} (${plant.nameEn})` : "-" },
-            { label: "ระดับควบคุม", value: isHighControl ? "ควบคุมเข้มงวด" : "ทั่วไป" },
-            { label: "ประเภท", value: applicationType === "NEW" ? "ยื่นใหม่" : applicationType === "RENEW" ? "ต่ออายุ" : "ขอใบแทน" },
-          ]}
-        />
+        <SummaryCard icon={Leaf} title="ชนิดสมุนไพรและประเภทคำขอ" items={[
+          { label: "พืช", value: plant ? `${plant.nameTh} (${plant.nameEn})` : "-" },
+          { label: "ระดับควบคุม", value: isHighControl ? "ควบคุมเข้มงวด" : "ทั่วไป" },
+          { label: "ประเภท", value: applicationType === "NEW" ? "ยื่นใหม่" : applicationType === "RENEW" ? "ต่ออายุ" : "ขอใบแทน" },
+        ]} />
 
-        <SummaryCard
-          icon={MapPin}
-          title="พื้นที่เพาะปลูก"
-          items={[
-            { label: "แปลง", value: farm.farmName || "-" },
-            { label: "พื้นที่", value: farm.areaRai ? `${farm.areaRai} ไร่` : "-" },
-            { label: "จังหวัด", value: farm.province || "-" },
-            { label: "อำเภอ/ตำบล", value: `${farm.district || "-"} / ${farm.subDistrict || "-"}` },
-            ...(farm.gpsLat && farm.gpsLng ? [{ label: "GPS", value: `${farm.gpsLat}, ${farm.gpsLng}` }] : []),
-            ...(farm.landOwnership ? [{ label: "สิทธิ์ที่ดิน", value: farm.landOwnership === "owned" ? "เจ้าของ" : farm.landOwnership === "leased" ? "เช่า" : farm.landOwnership }] : []),
-          ]}
-        />
+        <SummaryCard icon={MapPin} title="พื้นที่เพาะปลูก (1 ฟาร์ม = 1 ใบรับรอง)" items={[
+          { label: "แปลง", value: farm.farmName || "-" },
+          { label: "พื้นที่", value: farm.areaRai ? `${farm.areaRai} ไร่` : "-" },
+          { label: "จังหวัด", value: farm.province || "-" },
+          { label: "อำเภอ/ตำบล", value: `${farm.district || "-"} / ${farm.subDistrict || "-"}` },
+          ...(farm.gpsLat && farm.gpsLng ? [{ label: "GPS", value: `${farm.gpsLat}, ${farm.gpsLng}` }] : []),
+        ]} />
 
-        <SummaryCard
-          icon={Sprout}
-          title="แผนการเพาะปลูก"
-          items={[
-            { label: "สายพันธุ์", value: cultivation.seedVariety || "-" },
-            { label: "แหล่งพันธุ์", value: cultivation.seedSource || "-" },
-            { label: "วิธีปลูก", value: cultivationMethodLabels[cultivation.cultivationMethod || ""] || "-" },
-            { label: "เริ่มปลูก", value: cultivation.cultivationStartDate || "-" },
-            { label: "รอบปลูก", value: cultivation.growthCycleDays ? `${cultivation.growthCycleDays} วัน` : "-" },
-            { label: "ปุ๋ย", value: fertilizerLabels[cultivation.fertilizerType || ""] || "-" },
-            { label: "ระบบน้ำ", value: irrigationLabels[cultivation.irrigationType || ""] || "-" },
-            { label: "เก็บเกี่ยว", value: harvestLabels[cultivation.harvestMethod || ""] || "-" },
-            { label: "ผลผลิตคาด", value: cultivation.estimatedYieldKg ? `${cultivation.estimatedYieldKg} กก.` : "-" },
-            { label: "ทำแห้ง", value: dryingLabels[cultivation.dryingMethod || ""] || "-" },
-            { label: "ใช้สารเคมี", value: cultivation.pesticideUsage ? "✅ ใช้" : "❌ ไม่ใช้" },
-          ]}
-        />
+        <SummaryCard icon={Sprout} title="แผนการเพาะปลูก" items={[
+          { label: "สายพันธุ์", value: seed.seedVariety || "-" },
+          { label: "แหล่งพันธุ์", value: seed.seedSource || "-" },
+          { label: "วิธีปลูก", value: cultivationMethodLabels[cultivation.cultivationMethod || ""] || "-" },
+          { label: "เริ่มปลูก", value: cultivation.cultivationStartDate || "-" },
+          { label: "รอบปลูก", value: cultivation.growthCycleDays ? `${cultivation.growthCycleDays} วัน` : "-" },
+          { label: "ปุ๋ย", value: fertilizerLabels[cultivation.fertilizerType || ""] || "-" },
+          { label: "ตารางปุ๋ย", value: `${(cultivation.fertilizerSchedule || []).length} ระยะ` },
+          { label: "ระบบน้ำ", value: irrigationLabels[irr.irrigationType || ""] || "-" },
+          { label: "เก็บเกี่ยว", value: harvestLabels[harv.harvestMethod || ""] || "-" },
+          { label: "ผลผลิตคาด", value: harv.estimatedYieldKg ? `${harv.estimatedYieldKg} กก.` : "-" },
+          { label: "ทำแห้ง", value: dryingLabels[post.dryingMethod || ""] || "-" },
+          { label: "ตรวจสารตกค้าง", value: qc.pesticideResidueTest ? "✅" : "❌" },
+        ]} />
 
-        <SummaryCard
-          icon={Shield}
-          title="มาตรการความปลอดภัย"
-          items={[
-            { label: "CCTV", value: compliance?.hasCCTV ? `✅ (${compliance.cctvCount || "-"} ตัว)` : "❌" },
-            { label: "รั้ว", value: compliance?.hasFencing ? `✅ (${compliance.fenceHeight || "-"} ม.)` : "❌" },
-            { label: "Access Log", value: compliance?.hasAccessLog ? "✅" : "❌" },
-            { label: "Biometric", value: compliance?.hasBiometric ? "✅" : "❌" },
-            { label: "Zoning", value: compliance?.hasZoning ? "✅" : "❌" },
-            { label: "Inventory", value: compliance?.hasInventoryControl ? "✅" : "❌" },
-            { label: "SOP", value: `${Object.values(compliance?.sopCoverage || {}).filter(Boolean).length}/7 ขั้นตอน` },
-          ]}
-        />
+        <SummaryCard icon={Shield} title="มาตรการความปลอดภัย" items={[
+          { label: "CCTV", value: compliance?.hasCCTV ? `✅ (${compliance.cctvCount || "-"} ตัว)` : "❌" },
+          { label: "รั้ว", value: compliance?.hasFencing ? `✅ (${compliance.fenceHeight || "-"} ม.)` : "❌" },
+          { label: "Access Log", value: compliance?.hasAccessLog ? "✅" : "❌" },
+          { label: "Biometric", value: compliance?.hasBiometric ? "✅" : "❌" },
+          { label: "Zoning", value: compliance?.hasZoning ? "✅" : "❌" },
+          { label: "SOP", value: `${Object.values(compliance?.sopCoverage || {}).filter(Boolean).length}/7 ขั้นตอน` },
+        ]} />
 
-        <SummaryCard
-          icon={Upload}
-          title="เอกสารแนบ"
-          items={[
-            { label: "อัปโหลดแล้ว", value: `${uploadedRequired}/${requiredDocs.length} รายการบังคับ` },
-            { label: "รวมทั้งหมด", value: `${documents.length} ไฟล์` },
-          ]}
-        />
+        <SummaryCard icon={Upload} title="เอกสารแนบ" items={[
+          { label: "อัปโหลดแล้ว", value: `${uploadedRequired}/${requiredDocs.length} รายการบังคับ` },
+          { label: "รวมทั้งหมด", value: `${documents.length} ไฟล์` },
+        ]} />
       </div>
 
-      {/* Missing docs warning */}
       {missingDocs.length > 0 && (
         <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
           <p className="text-xs font-medium text-destructive mb-2">
@@ -154,7 +133,6 @@ export default function StepConfirm({ applicant, farm, cultivation, compliance, 
         </div>
       )}
 
-      {/* Pre-submission checklist */}
       <div className="space-y-2">
         <h4 className="text-xs font-semibold flex items-center gap-1.5">
           <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
@@ -164,12 +142,9 @@ export default function StepConfirm({ applicant, farm, cultivation, compliance, 
           {PRE_SUBMIT_CHECKLIST.map((item, i) => {
             if (!isHighControl && item.includes("HIGH_CONTROL")) return null;
             return (
-              <label
-                key={i}
-                className={`flex cursor-pointer items-center gap-2.5 rounded-lg border p-2.5 transition-colors ${
-                  checklist[i] ? "border-success/30 bg-success/5" : "border-border"
-                }`}
-              >
+              <label key={i} className={`flex cursor-pointer items-center gap-2.5 rounded-lg border p-2.5 transition-colors ${
+                checklist[i] ? "border-success/30 bg-success/5" : "border-border"
+              }`}>
                 <Checkbox checked={checklist[i]} onCheckedChange={() => toggleCheck(i)} />
                 <span className="text-xs">{item.replace(" (กรณี HIGH_CONTROL)", isHighControl ? "" : "")}</span>
               </label>
@@ -180,23 +155,15 @@ export default function StepConfirm({ applicant, farm, cultivation, compliance, 
 
       <div className="rounded-lg border border-warning/30 bg-warning/5 p-3">
         <p className="text-xs text-warning font-medium">
-          ⚠️ หลังจากยื่นคำขอ ท่านจะต้องชำระค่าตรวจเอกสาร ฿5,000 ภายใน 7 วัน
-          ระบบจะล็อกฟอร์มทันทีที่ส่ง
+          ⚠️ ใบรับรอง GACP ออกให้รายฟาร์ม (1 ฟาร์ม = 1 ใบรับรอง) อายุ 3 ปี
+          หลังจากยื่นจะต้องชำระค่าตรวจเอกสาร ฿5,000 ภายใน 7 วัน
         </p>
       </div>
     </div>
   );
 }
 
-function SummaryCard({
-  icon: Icon,
-  title,
-  items,
-}: {
-  icon: React.ElementType;
-  title: string;
-  items: { label: string; value: string }[];
-}) {
+function SummaryCard({ icon: Icon, title, items }: { icon: React.ElementType; title: string; items: { label: string; value: string }[] }) {
   return (
     <div className="rounded-lg border border-border bg-muted/30 p-3">
       <div className="mb-2 flex items-center gap-2">

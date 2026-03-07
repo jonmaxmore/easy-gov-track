@@ -49,10 +49,16 @@ export default function SubmitDocumentPage() {
   const [cultivation, setCultivation] = useState<Partial<CultivationInfo>>({
     cultivationMethod: "outdoor",
     fertilizerType: "organic",
-    irrigationType: "drip",
-    harvestMethod: "manual",
-    dryingMethod: "shade_dry",
-    pesticideUsage: false,
+    fertilizerSchedule: [],
+    soilPreparation: { method: "", preparationDate: "", soilAmendments: "" } as any,
+    seedling: { propagationMethod: "", seedVariety: "", seedSource: "" } as any,
+    pestManagement: { controlMethod: "", commonPests: "", commonDiseases: "", preventionMeasures: "", weedControl: "" } as any,
+    irrigation: { irrigationType: "drip", irrigationFrequency: "", waterSource: "", waterQualityTest: false } as any,
+    environmentalMonitoring: { hasTemperatureLog: false, hasHumidityLog: false, hasRainfallLog: false, hasLightIntensityLog: false, monitoringFrequency: "" } as any,
+    harvest: { harvestMethod: "manual", expectedHarvestDate: "", harvestCriteria: "", maturityIndicators: "", harvestTools: "", estimatedYieldKg: 0 } as any,
+    postHarvest: { cleaningMethod: "", dryingMethod: "shade_dry", batchTraceability: false, wasteManagementPlan: "" } as any,
+    qualityControl: { qualityControlMeasures: "", samplingFrequency: "", labTestingPlan: "", recordKeepingMethod: "", pesticideResidueTest: false, heavyMetalTest: false, microbialTest: false } as any,
+    cropRotation: { hasCropRotation: false } as any,
   });
   const [compliance, setCompliance] = useState<Partial<ComplianceInfo>>({
     hasCCTV: false,
@@ -101,7 +107,6 @@ export default function SubmitDocumentPage() {
       case 4: {
         const result = complianceSchema.safeParse(compliance);
         errors = getZodErrors(result);
-        // Additional plant-specific validation
         if (Object.keys(errors).length === 0 && plant) {
           const complianceErrors = validateComplianceForPlant(
             compliance as any,
@@ -115,7 +120,6 @@ export default function SubmitDocumentPage() {
         break;
       }
       case 5: {
-        // Document validation
         const relevantDocs = getRelevantDocuments(selectedPlant, applicationType);
         const requiredIds = relevantDocs.filter((d) => d.required).map((d) => d.id);
         const uploadedIds = documents.map((d) => d.docId);
@@ -125,7 +129,6 @@ export default function SubmitDocumentPage() {
         }
         break;
       }
-      // Steps 6 (payment preview) and 7 (confirm) always pass
       default:
         break;
     }
@@ -157,14 +160,13 @@ export default function SubmitDocumentPage() {
     setCurrentStep(0);
   };
 
-  // Error count badge for stepper
   const errorCount = Object.keys(stepErrors).length;
 
   return (
     <div className="space-y-6 pb-20 md:pb-6">
       <div>
         <h2 className="text-lg font-bold text-foreground md:text-xl">ยื่นคำขอรับรอง GACP</h2>
-        <p className="text-sm text-muted-foreground">กรอกข้อมูลตามขั้นตอนเพื่อยื่นขอรับรองมาตรฐาน</p>
+        <p className="text-sm text-muted-foreground">กรอกข้อมูลตามขั้นตอนเพื่อยื่นขอรับรองมาตรฐาน (1 ฟาร์ม = 1 ใบรับรอง, อายุ 3 ปี)</p>
       </div>
 
       {/* Stepper */}
