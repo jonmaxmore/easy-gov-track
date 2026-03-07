@@ -123,7 +123,7 @@ export default function StepCultivation({ value, onChange, errors = {}, isHighCo
   // Nested updaters
   const updateRoot = (key: keyof CultivationInfo, val: unknown) => onChange({ ...value, [key]: val });
   const updateNested = (section: keyof CultivationInfo, key: string, val: unknown) => {
-    const current = (value[section] as Record<string, unknown>) || {};
+    const current = (value[section] as unknown as Record<string, unknown>) || {};
     onChange({ ...value, [section]: { ...current, [key]: val } });
   };
 
