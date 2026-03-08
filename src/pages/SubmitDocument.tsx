@@ -103,6 +103,13 @@ export default function SubmitDocumentPage() {
       case 3: {
         const result = cultivationSchema.safeParse(cultivation);
         errors = getZodErrors(result);
+        // HIGH_CONTROL extra validation
+        if (Object.keys(errors).length === 0 && isHighControl) {
+          const hcErrors = validateCultivationForHighControl(cultivation as any);
+          if (hcErrors.length > 0) {
+            errors["_cultivation"] = hcErrors.join("; ");
+          }
+        }
         break;
       }
       case 4: {
