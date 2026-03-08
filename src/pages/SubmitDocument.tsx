@@ -216,6 +216,9 @@ export default function SubmitDocumentPage() {
           <p className="text-xs font-medium text-destructive">
             ⚠️ พบข้อผิดพลาด {errorCount} รายการ กรุณาตรวจสอบข้อมูลด้านล่าง
           </p>
+          {stepErrors["_cultivation"] && (
+            <p className="mt-1 text-[11px] text-destructive">{stepErrors["_cultivation"]}</p>
+          )}
           {stepErrors["_compliance"] && (
             <p className="mt-1 text-[11px] text-destructive">{stepErrors["_compliance"]}</p>
           )}
