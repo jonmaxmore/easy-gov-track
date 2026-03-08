@@ -19,6 +19,7 @@ import {
   cultivationSchema,
   complianceSchema,
   validateComplianceForPlant,
+  validateCultivationForHighControl,
   getZodErrors,
 } from "@/lib/validations";
 import type { ApplicantInfo, FarmInfo, ComplianceInfo, CultivationInfo, UploadedDocument, ApplicationType } from "@/types/application";
@@ -102,6 +103,13 @@ export default function SubmitDocumentPage() {
       case 3: {
         const result = cultivationSchema.safeParse(cultivation);
         errors = getZodErrors(result);
+        // HIGH_CONTROL extra validation
+        if (Object.keys(errors).length === 0 && isHighControl) {
+          const hcErrors = validateCultivationForHighControl(cultivation as any);
+          if (hcErrors.length > 0) {
+            errors["_cultivation"] = hcErrors.join("; ");
+          }
+        }
         break;
       }
       case 4: {
@@ -208,6 +216,9 @@ export default function SubmitDocumentPage() {
           <p className="text-xs font-medium text-destructive">
             ⚠️ พบข้อผิดพลาด {errorCount} รายการ กรุณาตรวจสอบข้อมูลด้านล่าง
           </p>
+          {stepErrors["_cultivation"] && (
+            <p className="mt-1 text-[11px] text-destructive">{stepErrors["_cultivation"]}</p>
+          )}
           {stepErrors["_compliance"] && (
             <p className="mt-1 text-[11px] text-destructive">{stepErrors["_compliance"]}</p>
           )}
