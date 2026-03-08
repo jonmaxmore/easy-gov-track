@@ -19,6 +19,7 @@ import {
   cultivationSchema,
   complianceSchema,
   validateComplianceForPlant,
+  validateCultivationForHighControl,
   getZodErrors,
 } from "@/lib/validations";
 import type { ApplicantInfo, FarmInfo, ComplianceInfo, CultivationInfo, UploadedDocument, ApplicationType } from "@/types/application";
