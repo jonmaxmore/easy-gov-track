@@ -20,6 +20,11 @@ import Planting from "./pages/Planting";
 import Certificates from "./pages/Certificates";
 import ApplicationDetail from "./pages/ApplicationDetail";
 import Payment from "./pages/Payment";
+import Payments from "./pages/Payments";
+import Establishments from "./pages/Establishments";
+import Notifications from "./pages/Notifications";
+import Settings from "./pages/Settings";
+import SOPBuilder from "./pages/SOPBuilder";
 
 // Provider pages
 import ProviderLogin from "./pages/ProviderLogin";
@@ -74,6 +79,11 @@ function AppRoutes() {
       <Route path="/certificates" element={<Certificates />} />
       <Route path="/application/:id" element={<ApplicationDetail />} />
       <Route path="/payment/:id" element={<Payment />} />
+      <Route path="/payments" element={<Payments />} />
+      <Route path="/establishments" element={<Establishments />} />
+      <Route path="/notifications" element={<Notifications />} />
+      <Route path="/settings" element={<Settings />} />
+      <Route path="/sop-builder" element={<SOPBuilder />} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

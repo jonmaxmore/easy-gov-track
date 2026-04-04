@@ -55,7 +55,7 @@ export default function LoginPage() {
     password: "รหัสผ่าน",
     forgot: "ลืมรหัสผ่าน?",
     signIn: "เข้าสู่ระบบ",
-    thaiId: "เข้าสู่ระบบด้วย Thai ID",
+    
     noAccount: "ยังไม่มีบัญชี?",
     register: "สมัครสมาชิก",
     providerLogin: "สำหรับเจ้าหน้าที่",
@@ -72,7 +72,7 @@ export default function LoginPage() {
     password: "Password",
     forgot: "Forgot password?",
     signIn: "Sign In",
-    thaiId: "Continue with Thai ID",
+    
     noAccount: "Don't have an account?",
     register: "Register",
     providerLogin: "Staff Login",
@@ -218,31 +218,6 @@ export default function LoginPage() {
                 {isLoading ? "..." : copy.signIn}
               </Button>
 
-              {/* Thai ID button */}
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border" />
-                </div>
-                <div className="relative flex justify-center">
-                  <span className="bg-background px-3 text-[10px] text-muted-foreground">
-                    {lang === "th" ? "หรือ" : "or"}
-                  </span>
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full gap-2"
-                onClick={() => {
-                  toast({
-                    title: lang === "th" ? "กำลังเชื่อมต่อ Thai ID..." : "Connecting to Thai ID...",
-                  });
-                }}
-              >
-                <ShieldCheck className="h-4 w-4 text-primary" />
-                {copy.thaiId}
-              </Button>
             </form>
 
             <div className="mt-6 text-center text-xs text-muted-foreground">
