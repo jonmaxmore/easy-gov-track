@@ -17,9 +17,13 @@ const mockApplications: Application[] = [
 
 const quickActions = [
   { icon: FileText, label: "ยื่นคำขอรับรอง", description: "ยื่นคำขอใหม่", path: "/submit", color: "bg-primary/10 text-primary" },
+  { icon: CreditCard, label: "การชำระเงิน", description: "จัดการการเงิน", path: "/payments", color: "bg-warning/10 text-warning" },
   { icon: Sprout, label: "ข้อมูลการปลูก", description: "บันทึกรอบปลูก", path: "/planting", color: "bg-success/10 text-success" },
   { icon: Award, label: "ใบรับรอง", description: "ดูใบรับรอง", path: "/certificates", color: "bg-secondary/10 text-secondary" },
+  { icon: Building2, label: "สถานประกอบการ", description: "จัดการฟาร์ม", path: "/establishments", color: "bg-info/10 text-info" },
+  { icon: ClipboardList, label: "SOP Builder", description: "สร้าง SOP", path: "/sop-builder", color: "bg-primary/10 text-primary" },
   { icon: BarChart3, label: "Track & Trace", description: "ตรวจสอบ QR", path: "/track", color: "bg-info/10 text-info" },
+  { icon: Bell, label: "แจ้งเตือน", description: "ข่าวสารล่าสุด", path: "/notifications", color: "bg-destructive/10 text-destructive" },
 ];
 
 export default function DashboardPage() {
