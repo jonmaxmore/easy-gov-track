@@ -55,7 +55,7 @@ export default function LoginPage() {
     password: "รหัสผ่าน",
     forgot: "ลืมรหัสผ่าน?",
     signIn: "เข้าสู่ระบบ",
-    thaiId: "เข้าสู่ระบบด้วย Thai ID",
+    
     noAccount: "ยังไม่มีบัญชี?",
     register: "สมัครสมาชิก",
     providerLogin: "สำหรับเจ้าหน้าที่",
