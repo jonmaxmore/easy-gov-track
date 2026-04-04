@@ -54,7 +54,7 @@ export default function DashboardPage() {
       {/* Quick Actions */}
       <div>
         <h3 className="mb-3 text-sm font-semibold text-foreground">เมนูลัด</h3>
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 md:grid-cols-4">
           {quickActions.map((action, i) => (
             <motion.div
               key={action.label}
