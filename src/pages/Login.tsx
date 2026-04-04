@@ -72,7 +72,7 @@ export default function LoginPage() {
     password: "Password",
     forgot: "Forgot password?",
     signIn: "Sign In",
-    thaiId: "Continue with Thai ID",
+    
     noAccount: "Don't have an account?",
     register: "Register",
     providerLogin: "Staff Login",
