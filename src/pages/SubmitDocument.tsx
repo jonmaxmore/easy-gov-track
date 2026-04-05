@@ -146,18 +146,9 @@ export default function SubmitDocumentPage() {
   };
 
   const handleNext = () => {
-    setAttemptedNext(true);
-    if (validateCurrentStep()) {
-      setStepErrors({});
-      setAttemptedNext(false);
-      setCurrentStep(currentStep + 1);
-    } else {
-      toast({
-        title: "กรุณาตรวจสอบข้อมูล",
-        description: "มีข้อมูลที่ยังไม่ครบ กรุณากรอกให้ครบถ้วน",
-        variant: "destructive",
-      });
-    }
+    setStepErrors({});
+    setAttemptedNext(false);
+    setCurrentStep(currentStep + 1);
   };
 
   const handleSubmit = () => {
