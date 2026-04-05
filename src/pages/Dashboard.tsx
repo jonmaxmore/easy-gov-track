@@ -4,7 +4,7 @@ import StatusCard from "@/components/StatusCard";
 import ApplicationList, { Application } from "@/components/ApplicationList";
 import {
   FileText, Clock, CheckCircle, AlertTriangle, Leaf, ArrowRight,
-  Sprout, Award, BarChart3, CreditCard, Building2, ClipboardList, Bell,
+  Sprout, Award, BarChart3, CreditCard, Building2, ClipboardList, Bell, FolderOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -18,6 +18,7 @@ const mockApplications: Application[] = [
 const quickActions = [
   { icon: FileText, label: "ยื่นคำขอรับรอง", description: "ยื่นคำขอใหม่", path: "/submit", color: "bg-primary/10 text-primary" },
   { icon: CreditCard, label: "การชำระเงิน", description: "จัดการการเงิน", path: "/payments", color: "bg-warning/10 text-warning" },
+  { icon: FolderOpen, label: "จัดการเอกสาร", description: "เอกสารทั้งหมด", path: "/documents", color: "bg-accent/10 text-accent-foreground" },
   { icon: Sprout, label: "ข้อมูลการปลูก", description: "บันทึกรอบปลูก", path: "/planting", color: "bg-success/10 text-success" },
   { icon: Award, label: "ใบรับรอง", description: "ดูใบรับรอง", path: "/certificates", color: "bg-secondary/10 text-secondary" },
   { icon: Building2, label: "สถานประกอบการ", description: "จัดการฟาร์ม", path: "/establishments", color: "bg-info/10 text-info" },

@@ -21,6 +21,7 @@ import Certificates from "./pages/Certificates";
 import ApplicationDetail from "./pages/ApplicationDetail";
 import Payment from "./pages/Payment";
 import Payments from "./pages/Payments";
+import Documents from "./pages/Documents";
 import Establishments from "./pages/Establishments";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
@@ -80,6 +81,7 @@ function AppRoutes() {
       <Route path="/application/:id" element={<ApplicationDetail />} />
       <Route path="/payment/:id" element={<Payment />} />
       <Route path="/payments" element={<Payments />} />
+      <Route path="/documents" element={<Documents />} />
       <Route path="/establishments" element={<Establishments />} />
       <Route path="/notifications" element={<Notifications />} />
       <Route path="/settings" element={<Settings />} />
