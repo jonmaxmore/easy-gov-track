@@ -21,6 +21,7 @@ import Certificates from "./pages/Certificates";
 import ApplicationDetail from "./pages/ApplicationDetail";
 import Payment from "./pages/Payment";
 import Payments from "./pages/Payments";
+import Documents from "./pages/Documents";
 import Establishments from "./pages/Establishments";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
