@@ -81,6 +81,7 @@ function AppRoutes() {
       <Route path="/application/:id" element={<ApplicationDetail />} />
       <Route path="/payment/:id" element={<Payment />} />
       <Route path="/payments" element={<Payments />} />
+      <Route path="/documents" element={<Documents />} />
       <Route path="/establishments" element={<Establishments />} />
       <Route path="/notifications" element={<Notifications />} />
       <Route path="/settings" element={<Settings />} />

@@ -10,6 +10,7 @@ const navItems = [
   { path: "/dashboard", label: "แดชบอร์ด", icon: LayoutDashboard },
   { path: "/submit", label: "ยื่นเอกสาร", icon: FileText },
   { path: "/payments", label: "การชำระเงิน", icon: CreditCard },
+  { path: "/documents", label: "เอกสาร", icon: FolderOpen },
   { path: "/establishments", label: "สถานประกอบการ", icon: Building2 },
   { path: "/planting", label: "การปลูก", icon: Sprout },
   { path: "/certificates", label: "ใบรับรอง", icon: Award },
