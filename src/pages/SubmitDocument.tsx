@@ -145,10 +145,13 @@ export default function SubmitDocumentPage() {
     return Object.keys(errors).length === 0;
   };
 
+  // Demo mode: skip all validation
   const handleNext = () => {
     setStepErrors({});
     setAttemptedNext(false);
-    setCurrentStep(currentStep + 1);
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    }
   };
 
   const handleSubmit = () => {
