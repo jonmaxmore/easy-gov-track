@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, FileText, QrCode, User, Menu, X, Leaf,
-  Sprout, Award, CreditCard, Building2, ClipboardList, Bell, Settings,
+  Sprout, Award, CreditCard, Building2, ClipboardList, Bell, Settings, FolderOpen,
 } from "lucide-react";
 
 const navItems = [
