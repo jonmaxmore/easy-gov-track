@@ -4,7 +4,7 @@ import StatusCard from "@/components/StatusCard";
 import ApplicationList, { Application } from "@/components/ApplicationList";
 import {
   FileText, Clock, CheckCircle, AlertTriangle, Leaf, ArrowRight,
-  Sprout, Award, BarChart3, CreditCard, Building2, ClipboardList, Bell,
+  Sprout, Award, BarChart3, CreditCard, Building2, ClipboardList, Bell, FolderOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
